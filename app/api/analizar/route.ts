@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { analizar } from "@/lib/ia";
+import { analizar, anthropicKey, geminiKey } from "@/lib/ia";
 
 export const maxDuration = 30;
 
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    if (!process.env.ANTHROPIC_API_KEY && !process.env.GEMINI_API_KEY) {
+    if (!anthropicKey() && !geminiKey()) {
       return NextResponse.json(
         { error: "El servidor no tiene configurada una API key de IA." },
         { status: 500 }

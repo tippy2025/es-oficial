@@ -28,6 +28,11 @@ interface EntradaAnalisis {
   mimeType?: string;
 }
 
+// Sanea claves cargadas con BOM/espacios (p. ej. al pegarlas por consola en Windows)
+const limpiarKey = (v?: string) => v?.replace(/^﻿/, "").trim() || undefined;
+export const anthropicKey = () => limpiarKey(process.env.ANTHROPIC_API_KEY);
+export const geminiKey = () => limpiarKey(process.env.GEMINI_API_KEY);
+
 function extraerJson(raw: string): Veredicto {
   const limpio = raw.replace(/```json|```/g, "").trim();
   const inicio = limpio.indexOf("{");
@@ -64,7 +69,7 @@ async function llamarAnthropic(entrada: EntradaAnalisis): Promise<string> {
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
-      "x-api-key": process.env.ANTHROPIC_API_KEY!,
+      "x-api-key": anthropicKey()!,
       "anthropic-version": "2023-06-01",
       "content-type": "application/json",
     },
@@ -96,7 +101,7 @@ async function llamarGemini(entrada: EntradaAnalisis): Promise<string> {
 
   const model = process.env.GEMINI_MODEL || "gemini-2.0-flash";
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey()}`,
     {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -113,7 +118,7 @@ async function llamarGemini(entrada: EntradaAnalisis): Promise<string> {
 }
 
 export async function analizar(entrada: EntradaAnalisis): Promise<Veredicto> {
-  const raw = process.env.ANTHROPIC_API_KEY
+  const raw = anthropicKey()
     ? await llamarAnthropic(entrada)
     : await llamarGemini(entrada);
   return extraerJson(raw);

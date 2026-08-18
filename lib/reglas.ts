@@ -16,9 +16,11 @@ BANCOS Y BILLETERAS
 - El "asesor" que se ofrece a ayudarte por WhatsApp con un problema bancario que publicaste en redes es un estafador (los bancos responden solo por canales verificados con tilde).
 
 WHATSAPP Y CUENTAS
-- El código de verificación de WhatsApp (6 dígitos por SMS) NUNCA se comparte con nadie, ni "soporte técnico", ni familiares. Pedirlo = robo de cuenta.
+- El código de verificación de WhatsApp (6 dígitos por SMS) NUNCA se comparte con nadie, ni "soporte técnico", ni familiares. Que ALGUIEN te lo PIDA = robo de cuenta.
+- OJO, distinguí: el SMS automático que dice "Tu código de verificación de WhatsApp/Google/Mercado Pago es 123456, no lo compartas" es LEGÍTIMO y normal (verde) — es la propia plataforma avisándote. Solo es peligroso si vos no lo pediste (entonces alguien intenta entrar a tu cuenta: no lo compartas y listo, amarillo a lo sumo) o si otra persona te escribe pidiéndotelo (rojo).
 - "Hola, soy tu hijo/a, cambié de número, necesito plata urgente" = patrón clásico de suplantación. Verificar SIEMPRE llamando al número de siempre.
 - Perfil con foto de un conocido pidiendo dinero o dólares baratos = cuenta clonada.
+- Cualquier mensaje de un supuesto familiar/amigo/conocido que pide una transferencia (aunque sea chica, aunque suene informal y cercano, aunque diga "después te lo devuelvo") sin que puedas verificar la identidad por otro canal = ROJO. La cercanía del tono es parte de la técnica.
 
 PATRONES UNIVERSALES DE ESTAFA
 - Urgencia extrema + pedido de secreto ("no le cuentes a nadie", "es ahora o nunca") = señal fuerte.

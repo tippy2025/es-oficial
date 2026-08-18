@@ -1,6 +1,30 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  AlertCircle,
+  AlertTriangle,
+  ArrowRight,
+  BadgeCheck,
+  Camera,
+  Check,
+  CheckCircle2,
+  Dices,
+  Flag,
+  Globe,
+  Image as ImageIcon,
+  ListChecks,
+  Loader2,
+  Lock,
+  Phone,
+  Search,
+  Share2,
+  ShieldAlert,
+  ShieldCheck,
+  Siren,
+  Smartphone,
+  X,
+} from "lucide-react";
 import type { Veredicto } from "@/lib/reglas";
 
 const EJEMPLOS = [
@@ -35,15 +59,15 @@ const EJEMPLOS_EXTRA = [
 ];
 
 const COLORES: Record<string, { borde: string; fondo: string; texto: string; punto: string }> = {
-  rojo: { borde: "border-red-500", fondo: "bg-red-50", texto: "text-red-800", punto: "bg-red-600" },
-  amarillo: { borde: "border-amber-500", fondo: "bg-amber-50", texto: "text-amber-800", punto: "bg-amber-500" },
-  verde: { borde: "border-green-500", fondo: "bg-green-50", texto: "text-green-800", punto: "bg-green-600" },
+  rojo: { borde: "border-red-600", fondo: "bg-red-50", texto: "text-red-900", punto: "bg-red-600" },
+  amarillo: { borde: "border-amber-500", fondo: "bg-amber-50", texto: "text-amber-900", punto: "bg-amber-500" },
+  verde: { borde: "border-green-600", fondo: "bg-green-50", texto: "text-green-900", punto: "bg-green-600" },
 };
 
 const TITULOS: Record<string, string> = {
-  rojo: "⛔ Alto riesgo de estafa",
-  amarillo: "⚠️ Sospechoso: verificá antes de actuar",
-  verde: "✅ Sin señales típicas de estafa",
+  rojo: "Alto riesgo de estafa",
+  amarillo: "Sospechoso: verificá antes de actuar",
+  verde: "Sin señales típicas de estafa",
 };
 
 export default function Home() {
@@ -172,8 +196,9 @@ export default function Home() {
 
   function compartir() {
     if (!veredicto) return;
+    const emoji = { rojo: "🔴", amarillo: "🟡", verde: "🟢" }[veredicto.nivel];
     const resumen = [
-      `${TITULOS[veredicto.nivel]}`,
+      `${emoji} ${TITULOS[veredicto.nivel].toUpperCase()}`,
       "",
       veredicto.explicacionSimple,
       "",
@@ -194,26 +219,33 @@ export default function Home() {
   const c = veredicto ? COLORES[veredicto.nivel] : null;
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
-      <div className="mx-auto max-w-2xl px-4 py-10 sm:py-16">
-        <header className="text-center">
-          <p className="text-5xl" aria-hidden>
-            {"🛡️"}
-          </p>
-          <h1 className="mt-3 text-4xl font-extrabold tracking-tight sm:text-5xl">
+    <main className="min-h-screen bg-[#f5f7fb] text-slate-900">
+      <div className="mx-auto max-w-2xl px-4 py-8 sm:py-14">
+        <header className="flex flex-col items-center text-center">
+          <div
+            className="flex h-20 w-20 items-center justify-center rounded-2xl bg-[#0b3d91] shadow-lg shadow-blue-900/20"
+            aria-hidden
+          >
+            <ShieldCheck className="h-11 w-11 text-white" strokeWidth={2.2} />
+          </div>
+          <h1 className="mt-4 text-4xl font-bold tracking-tight text-[#0b3d91] sm:text-5xl">
             ¿Es Oficial?
           </h1>
-          <p className="mt-3 text-xl text-slate-600">
+          <p className="mt-3 text-xl text-slate-700">
             ¿Te llegó un mensaje raro? Antes de responder, preguntá.
           </p>
-          <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
+          <p className="mx-auto mt-2 max-w-md text-base text-slate-600">
             Pegá el mensaje o subí una captura y te decimos en segundos si tiene
             señales de estafa y qué hacer.
           </p>
         </header>
 
         <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+          <label htmlFor="mensaje" className="sr-only">
+            Mensaje sospechoso
+          </label>
           <textarea
+            id="mensaje"
             value={texto}
             onChange={(e) => {
               setTexto(e.target.value);
@@ -224,19 +256,21 @@ export default function Home() {
             placeholder={
               "Pegá acá el mensaje sospechoso (WhatsApp, SMS o mail)...\nTambién podés pegar una captura con Ctrl+V."
             }
-            className="w-full resize-y rounded-xl border border-slate-300 p-4 text-lg outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+            className="w-full resize-y rounded-xl border border-slate-300 bg-white p-4 text-lg text-slate-900 placeholder:text-slate-500 focus:border-[#1d4ed8] focus:ring-2 focus:ring-blue-200"
           />
 
           {imagen && (
             <div className="mt-3 flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={imagen.preview} alt="Captura subida" className="h-20 rounded-lg object-cover" />
-              <span className="text-sm text-slate-600">Captura lista para analizar</span>
+              <span className="flex items-center gap-2 text-sm text-slate-700">
+                <ImageIcon className="h-4 w-4" aria-hidden /> Captura lista para analizar
+              </span>
               <button
                 onClick={() => setImagen(null)}
-                className="ml-auto rounded-lg px-3 py-1 text-sm text-red-600 hover:bg-red-50"
+                className="ml-auto flex items-center gap-1 rounded-lg px-3 py-1 text-sm text-red-700 hover:bg-red-50"
               >
-                Quitar
+                <X className="h-4 w-4" aria-hidden /> Quitar
               </button>
             </div>
           )}
@@ -244,9 +278,9 @@ export default function Home() {
           <div className="mt-4 flex flex-col gap-3 sm:flex-row">
             <button
               onClick={() => fileRef.current?.click()}
-              className="rounded-xl border border-slate-300 px-5 py-3 text-lg font-medium text-slate-700 hover:bg-slate-100"
+              className="flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-lg font-medium text-slate-800 hover:border-slate-400 hover:bg-slate-50"
             >
-              {"📷"} Subir captura
+              <Camera className="h-5 w-5" aria-hidden /> Subir captura
             </button>
             <input
               ref={fileRef}
@@ -258,14 +292,22 @@ export default function Home() {
             <button
               onClick={() => analizar()}
               disabled={cargando}
-              className="flex-1 rounded-xl bg-blue-600 px-5 py-3 text-lg font-semibold text-white shadow hover:bg-blue-700 disabled:opacity-60"
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#0b3d91] px-5 py-3 text-lg font-bold text-white shadow-md shadow-blue-900/20 hover:bg-[#1d4ed8] disabled:cursor-not-allowed disabled:opacity-70"
             >
-              {cargando ? "Analizando..." : "Analizar mensaje"}
+              {cargando ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" aria-hidden /> Analizando…
+                </>
+              ) : (
+                <>
+                  <Search className="h-5 w-5" aria-hidden /> Analizar mensaje
+                </>
+              )}
             </button>
           </div>
 
-          <div className="mt-4">
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+          <div className="mt-5">
+            <p className="text-xs font-bold uppercase tracking-wide text-slate-600">
               Probá con un ejemplo
             </p>
             <div className="mt-2 flex flex-wrap gap-2">
@@ -277,7 +319,7 @@ export default function Home() {
                     setImagen(null);
                     setVeredicto(null);
                   }}
-                  className="rounded-full border border-slate-300 px-3 py-1.5 text-sm text-slate-600 hover:border-blue-400 hover:text-blue-700"
+                  className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 hover:border-[#1d4ed8] hover:text-[#1d4ed8]"
                 >
                   {ej.etiqueta}
                 </button>
@@ -289,39 +331,52 @@ export default function Home() {
                   setImagen(null);
                   setVeredicto(null);
                 }}
-                className="rounded-full border border-dashed border-blue-400 px-3 py-1.5 text-sm text-blue-700 hover:bg-blue-50"
+                className="flex items-center gap-1.5 rounded-full border border-dashed border-[#1d4ed8] px-3 py-1.5 text-sm text-[#1d4ed8] hover:bg-blue-50"
                 title="Cargar un mensaje de prueba al azar (¿estafa o real? descubrilo)"
               >
-                {"🎲"} Sorprendeme
+                <Dices className="h-4 w-4" aria-hidden /> Sorprendeme
               </button>
             </div>
           </div>
 
           {error && (
-            <p className="mt-4 rounded-xl bg-red-50 p-3 text-red-700">{error}</p>
+            <p className="mt-4 flex items-start gap-2 rounded-xl bg-red-50 p-3 text-red-800">
+              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden /> {error}
+            </p>
           )}
         </section>
 
         {veredicto && c && (
           <section
             ref={resultadoRef}
-            className={`mt-6 rounded-2xl border-2 ${c.borde} ${c.fondo} p-5 sm:p-6`}
+            className={`mt-6 rounded-2xl border-2 ${c.borde} ${c.fondo} p-5 shadow-sm sm:p-6`}
+            aria-live="polite"
           >
             <div className="flex items-center gap-3">
-              <span className={`h-4 w-4 shrink-0 animate-pulse rounded-full ${c.punto}`} />
-              <h2 className={`text-2xl font-bold ${c.texto}`}>{TITULOS[veredicto.nivel]}</h2>
+              <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${c.punto} text-white`}>
+                {veredicto.nivel === "rojo" ? (
+                  <ShieldAlert className="h-6 w-6" aria-hidden />
+                ) : veredicto.nivel === "amarillo" ? (
+                  <AlertTriangle className="h-6 w-6" aria-hidden />
+                ) : (
+                  <ShieldCheck className="h-6 w-6" aria-hidden />
+                )}
+              </span>
+              <h2 className={`text-2xl font-bold leading-tight ${c.texto}`}>{TITULOS[veredicto.nivel]}</h2>
             </div>
-            <p className="mt-3 text-lg leading-relaxed text-slate-800">
+            <p className="mt-4 text-lg leading-relaxed text-slate-800">
               {veredicto.explicacionSimple}
             </p>
 
             {veredicto.senales.length > 0 && (
               <div className="mt-5">
-                <h3 className="font-semibold text-slate-900">Señales detectadas</h3>
+                <h3 className="flex items-center gap-2 font-bold text-slate-900">
+                  <Search className="h-4 w-4 text-slate-600" aria-hidden /> Señales detectadas
+                </h3>
                 <ul className="mt-2 space-y-2">
                   {veredicto.senales.map((s, i) => (
                     <li key={i} className="flex gap-2 text-slate-800">
-                      <span aria-hidden>{"🔎"}</span>
+                      <span className={`mt-2 h-2 w-2 shrink-0 rounded-full ${c.punto}`} aria-hidden />
                       <span>{s}</span>
                     </li>
                   ))}
@@ -331,11 +386,13 @@ export default function Home() {
 
             {veredicto.queHacer.length > 0 && (
               <div className="mt-5">
-                <h3 className="font-semibold text-slate-900">Qué hacer ahora</h3>
+                <h3 className="flex items-center gap-2 font-bold text-slate-900">
+                  <ListChecks className="h-4 w-4 text-slate-600" aria-hidden /> Qué hacer ahora
+                </h3>
                 <ul className="mt-2 space-y-2">
                   {veredicto.queHacer.map((s, i) => (
                     <li key={i} className="flex gap-2 text-slate-800">
-                      <span aria-hidden>{"👉"}</span>
+                      <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-slate-600" aria-hidden />
                       <span className="font-medium">{s}</span>
                     </li>
                   ))}
@@ -344,9 +401,9 @@ export default function Home() {
             )}
 
             {veredicto.canalOficial && (
-              <div className="mt-5 rounded-xl border-2 border-blue-500 bg-white p-4">
-                <p className="text-xs font-semibold uppercase tracking-wide text-blue-700">
-                  {"☑️"} Canal oficial verificado · {veredicto.canalOficial.nombre}
+              <div className="mt-5 rounded-xl border-2 border-[#0b3d91] bg-white p-4">
+                <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-[#0b3d91]">
+                  <BadgeCheck className="h-4 w-4" aria-hidden /> Canal oficial verificado · {veredicto.canalOficial.nombre}
                 </p>
                 <p className="mt-1 text-slate-800">
                   {veredicto.canalOficial.nuncaHace}
@@ -355,9 +412,9 @@ export default function Home() {
                   {veredicto.canalOficial.telefono && (
                     <a
                       href={`tel:${veredicto.canalOficial.telefono.replace(/[^\d+]/g, "")}`}
-                      className="flex-1 rounded-xl bg-blue-600 px-4 py-3 text-center text-lg font-semibold text-white hover:bg-blue-700"
+                      className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#0b3d91] px-4 py-3 text-center text-lg font-bold text-white hover:bg-[#1d4ed8]"
                     >
-                      {"📞"} Llamar al {veredicto.canalOficial.telefono}
+                      <Phone className="h-5 w-5" aria-hidden /> Llamar al {veredicto.canalOficial.telefono}
                     </a>
                   )}
                   {veredicto.canalOficial.web && (
@@ -365,34 +422,36 @@ export default function Home() {
                       href={`https://${veredicto.canalOficial.web}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 rounded-xl border border-blue-600 px-4 py-3 text-center text-lg font-semibold text-blue-700 hover:bg-blue-50"
+                      className="flex flex-1 items-center justify-center gap-2 rounded-xl border-2 border-[#0b3d91] px-4 py-3 text-center text-lg font-bold text-[#0b3d91] hover:bg-blue-50"
                     >
-                      {"🌐"} {veredicto.canalOficial.web}
+                      <Globe className="h-5 w-5" aria-hidden /> {veredicto.canalOficial.web}
                     </a>
                   )}
                 </div>
-                <p className="mt-2 text-xs text-slate-500">
+                <p className="mt-2 text-sm text-slate-600">
                   Estos son los datos reales del organismo, no los del mensaje. Llamá o entrá vos: nunca desde el link que te mandaron.
                 </p>
               </div>
             )}
 
             {veredicto.verificacionOficial && (
-              <div className="mt-4 rounded-xl bg-white/70 p-4">
-                <h3 className="font-semibold text-slate-900">
-                  {"🔎"} Cómo confirmarlo
+              <div className="mt-4 rounded-xl bg-white/80 p-4">
+                <h3 className="flex items-center gap-2 font-bold text-slate-900">
+                  <CheckCircle2 className="h-4 w-4 text-slate-600" aria-hidden /> Cómo confirmarlo
                 </h3>
                 <p className="mt-1 text-slate-800">{veredicto.verificacionOficial}</p>
               </div>
             )}
 
             {veredicto.nivel !== "verde" && (
-              <div className="mt-4 rounded-xl bg-white/70 p-4">
-                <h3 className="font-semibold text-slate-900">{"🚨"} Dónde denunciar</h3>
+              <div className="mt-4 rounded-xl bg-white/80 p-4">
+                <h3 className="flex items-center gap-2 font-bold text-slate-900">
+                  <Siren className="h-4 w-4 text-slate-600" aria-hidden /> Dónde denunciar
+                </h3>
                 <p className="mt-1 text-slate-800">
                   Si transferiste dinero o diste datos, llamá <strong>ya</strong> a tu banco por el número del dorso de tu tarjeta.
                   Denunciá el intento en la Unidad Fiscal de Ciberdelincuencia (UFECI):{" "}
-                  <a className="underline" href="mailto:denunciasufeci@mpf.gov.ar">denunciasufeci@mpf.gov.ar</a>{" "}
+                  <a className="font-medium text-[#0b3d91] underline" href="mailto:denunciasufeci@mpf.gov.ar">denunciasufeci@mpf.gov.ar</a>{" "}
                   o en la comisaría más cercana. Línea gratuita de orientación: <strong>134</strong>.
                 </p>
               </div>
@@ -401,17 +460,33 @@ export default function Home() {
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <button
                 onClick={compartir}
-                className="flex-1 rounded-xl bg-slate-900 px-5 py-3 text-lg font-semibold text-white hover:bg-slate-700"
+                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#0b3d91] px-5 py-3 text-lg font-bold text-white shadow-md shadow-blue-900/20 hover:bg-[#1d4ed8]"
               >
-                {copiado ? "¡Copiado! Pegalo en WhatsApp" : "💬 Copiar para compartir con mamá"}
+                {copiado ? (
+                  <>
+                    <Check className="h-5 w-5" aria-hidden /> ¡Copiado! Pegalo en WhatsApp
+                  </>
+                ) : (
+                  <>
+                    <Share2 className="h-5 w-5" aria-hidden /> Copiar para compartir con mamá
+                  </>
+                )}
               </button>
               {veredicto.nivel !== "verde" && (
                 <button
                   onClick={reportar}
                   disabled={reportado}
-                  className="rounded-xl border border-slate-400 px-5 py-3 text-lg font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-60"
+                  className="flex items-center justify-center gap-2 rounded-xl border-2 border-slate-400 bg-white px-5 py-3 text-lg font-medium text-slate-800 hover:border-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  {reportado ? "✔️ Gracias, sumado a la base" : "🚩 Reportar estafa real"}
+                  {reportado ? (
+                    <>
+                      <Check className="h-5 w-5" aria-hidden /> Gracias, sumado a la base
+                    </>
+                  ) : (
+                    <>
+                      <Flag className="h-5 w-5" aria-hidden /> Reportar estafa real
+                    </>
+                  )}
                 </button>
               )}
             </div>
@@ -420,13 +495,14 @@ export default function Home() {
 
         <GuiaInstalacion />
 
-        <footer className="mt-10 text-center text-xs leading-relaxed text-slate-400">
+        <footer className="mt-10 text-center text-sm leading-relaxed text-slate-600">
           <p>
             ¿Es Oficial? evalúa señales de riesgo con inteligencia artificial y
             puede equivocarse. No reemplaza la verificación con el organismo o
             banco por sus canales oficiales. No envíes datos personales sensibles.
           </p>
           <p className="mt-2">
+            <Lock className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden />
             Las imágenes y textos se analizan al momento y no se guardan.
           </p>
         </footer>
@@ -479,13 +555,13 @@ function GuiaInstalacion() {
         className="flex w-full items-center justify-between text-left"
         aria-expanded={abierta}
       >
-        <span className="text-base font-semibold text-blue-900">
-          {"📱"} Tenela en tu celular {so === "ios" ? "(iPhone)" : so === "android" ? "(Android)" : ""}
+        <span className="flex items-center gap-2 text-base font-bold text-[#0b3d91]">
+          <Smartphone className="h-5 w-5" aria-hidden /> Tenela en tu celular {so === "ios" ? "(iPhone)" : so === "android" ? "(Android)" : ""}
         </span>
-        <span className="text-blue-700">{abierta ? "▲" : "▼"}</span>
+        <span className="text-[#0b3d91]">{abierta ? "▲" : "▼"}</span>
       </button>
       {abierta && (
-        <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm text-blue-900">
+        <ol className="mt-3 list-decimal space-y-2 pl-5 text-base text-slate-800">
           {pasos.map((p, i) => (
             <li key={i}>{p}</li>
           ))}

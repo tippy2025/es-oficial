@@ -31,6 +31,12 @@ PATRONES UNIVERSALES DE ESTAFA
 - Jefe/gerente pidiendo por chat la compra urgente de gift cards = fraude.
 - Cobrar por adelantado para "liberar un paquete retenido en aduana" de un correo = estafa (el Correo Argentino cobra solo en sucursal o su web oficial).
 
+LINKS Y SITIOS (si el mensaje trae una URL, analizala)
+- Dominios oficiales argentinos: los organismos públicos usan .gob.ar o .gov.ar (anses.gob.ar, arca.gob.ar, argentina.gob.ar); PAMI usa pami.org.ar. Un "gob" en un dominio .com/.net/.xyz/.top es imitación.
+- Señales de dominio falso: nombre de la marca + palabras como "seguridad", "verificacion", "online", "ar" separadas por guiones (galicia-seguridad-online.com), terminaciones raras (.xyz, .top, .click, .icu, .site), subdominios que imitan (bna.com.ar.algo.net: el dominio real es lo que va justo antes del .net), letras cambiadas (mercadopag0, santamder), acortadores (bit.ly, cutt.ly, tinyurl).
+- HTTP sin S, o un link que no coincide con el texto visible, son señales fuertes.
+- Un mail oficial de Mercado Libre/Pago termina en @mercadolibre.com / @mercadopago.com; los bancos usan su dominio propio, nunca gmail/hotmail/outlook.
+
 CÓMO VERIFICAR EN SERIO
 - Cortá y llamá vos al número oficial que figura en la web del organismo/banco (no al que te llamó ni al que figura en el mensaje).
 - Entrá escribiendo vos la dirección oficial en el navegador, nunca desde el link recibido.
@@ -45,6 +51,17 @@ export const NIVELES = {
 
 export type Nivel = keyof typeof NIVELES;
 
+export interface CanalOficial {
+  id: string;
+  nombre: string;
+  categoria: string;
+  telefono: string | null;
+  web: string | null;
+  app: string | null;
+  alias: string[];
+  nuncaHace: string;
+}
+
 export interface Veredicto {
   nivel: Nivel;
   titulo: string;
@@ -52,4 +69,8 @@ export interface Veredicto {
   queHacer: string[];
   verificacionOficial: string;
   explicacionSimple: string;
+  /** id del organismo/empresa que el mensaje dice ser (del directorio) o null */
+  organismoSuplantado?: string | null;
+  /** datos verificados del canal oficial, resueltos en el servidor */
+  canalOficial?: CanalOficial | null;
 }

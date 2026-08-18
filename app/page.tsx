@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Veredicto } from "@/lib/reglas";
 
 const EJEMPLOS = [
@@ -40,6 +40,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [veredicto, setVeredicto] = useState<Veredicto | null>(null);
   const [copiado, setCopiado] = useState(false);
+  const [reportado, setReportado] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const resultadoRef = useRef<HTMLDivElement>(null);
 
@@ -66,32 +67,93 @@ export default function Home() {
     [cargarImagen]
   );
 
-  async function analizar() {
-    if (!texto.trim() && !imagen) {
-      setError("Pegá el mensaje sospechoso o subí una captura de pantalla.");
-      return;
-    }
-    setCargando(true);
-    setError(null);
-    setVeredicto(null);
+  const analizar = useCallback(
+    async (
+      textoIn: string = texto,
+      imagenIn: { base64: string; mime: string; preview: string } | null = imagen
+    ) => {
+      if (!textoIn.trim() && !imagenIn) {
+        setError("Pegá el mensaje sospechoso o subí una captura de pantalla.");
+        return;
+      }
+      setCargando(true);
+      setError(null);
+      setVeredicto(null);
+      setReportado(false);
+      try {
+        const res = await fetch("/api/analizar", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            texto: textoIn.trim() || undefined,
+            imagenBase64: imagenIn?.base64,
+            mimeType: imagenIn?.mime,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Error desconocido");
+        setVeredicto(data);
+        setTimeout(
+          () => resultadoRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+          100
+        );
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "No pudimos analizar el mensaje.");
+      } finally {
+        setCargando(false);
+      }
+    },
+    [texto, imagen]
+  );
+
+  // Contenido que llega desde el menú "Compartir" del celular (Web Share Target).
+  useEffect(() => {
+    let compartido: { texto?: string; imagenDataUrl?: string | null } | null = null;
     try {
-      const res = await fetch("/api/analizar", {
+      const raw = sessionStorage.getItem("esoficial_compartido");
+      if (raw) {
+        compartido = JSON.parse(raw);
+        sessionStorage.removeItem("esoficial_compartido");
+      } else {
+        const m = document.cookie.match(/(?:^|; )esoficial_compartido=([^;]*)/);
+        if (m) {
+          compartido = JSON.parse(decodeURIComponent(m[1]));
+          document.cookie = "esoficial_compartido=; Max-Age=0; path=/";
+        }
+      }
+    } catch {
+      compartido = null;
+    }
+    if (!compartido) return;
+    const t = compartido.texto ?? "";
+    let img: { base64: string; mime: string; preview: string } | null = null;
+    if (compartido.imagenDataUrl) {
+      const [meta, b64] = compartido.imagenDataUrl.split(",");
+      const mime = meta.replace("data:", "").replace(";base64", "") || "image/png";
+      img = { base64: b64, mime, preview: compartido.imagenDataUrl };
+    }
+    setTexto(t);
+    setImagen(img);
+    if (t || img) void analizar(t, img);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function reportar() {
+    if (!veredicto || reportado) return;
+    setReportado(true);
+    try {
+      await fetch("/api/reportar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          texto: texto.trim() || undefined,
-          imagenBase64: imagen?.base64,
-          mimeType: imagen?.mime,
+          nivel: veredicto.nivel,
+          titulo: veredicto.titulo,
+          organismo: veredicto.organismoSuplantado ?? null,
+          senales: veredicto.senales,
         }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Error desconocido");
-      setVeredicto(data);
-      setTimeout(() => resultadoRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "No pudimos analizar el mensaje.");
-    } finally {
-      setCargando(false);
+    } catch {
+      /* el reporte es best-effort */
     }
   }
 
@@ -181,7 +243,7 @@ export default function Home() {
               onChange={(e) => e.target.files?.[0] && cargarImagen(e.target.files[0])}
             />
             <button
-              onClick={analizar}
+              onClick={() => analizar()}
               disabled={cargando}
               className="flex-1 rounded-xl bg-blue-600 px-5 py-3 text-lg font-semibold text-white shadow hover:bg-blue-700 disabled:opacity-60"
             >
@@ -256,21 +318,78 @@ export default function Home() {
               </div>
             )}
 
+            {veredicto.canalOficial && (
+              <div className="mt-5 rounded-xl border-2 border-blue-500 bg-white p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-blue-700">
+                  {"☑️"} Canal oficial verificado · {veredicto.canalOficial.nombre}
+                </p>
+                <p className="mt-1 text-slate-800">
+                  {veredicto.canalOficial.nuncaHace}
+                </p>
+                <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                  {veredicto.canalOficial.telefono && (
+                    <a
+                      href={`tel:${veredicto.canalOficial.telefono.replace(/[^\d+]/g, "")}`}
+                      className="flex-1 rounded-xl bg-blue-600 px-4 py-3 text-center text-lg font-semibold text-white hover:bg-blue-700"
+                    >
+                      {"📞"} Llamar al {veredicto.canalOficial.telefono}
+                    </a>
+                  )}
+                  {veredicto.canalOficial.web && (
+                    <a
+                      href={`https://${veredicto.canalOficial.web}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 rounded-xl border border-blue-600 px-4 py-3 text-center text-lg font-semibold text-blue-700 hover:bg-blue-50"
+                    >
+                      {"🌐"} {veredicto.canalOficial.web}
+                    </a>
+                  )}
+                </div>
+                <p className="mt-2 text-xs text-slate-500">
+                  Estos son los datos reales del organismo, no los del mensaje. Llamá o entrá vos: nunca desde el link que te mandaron.
+                </p>
+              </div>
+            )}
+
             {veredicto.verificacionOficial && (
-              <div className="mt-5 rounded-xl bg-white/70 p-4">
+              <div className="mt-4 rounded-xl bg-white/70 p-4">
                 <h3 className="font-semibold text-slate-900">
-                  {"☑️"} Cómo verificar por el canal oficial
+                  {"🔎"} Cómo confirmarlo
                 </h3>
                 <p className="mt-1 text-slate-800">{veredicto.verificacionOficial}</p>
               </div>
             )}
 
-            <button
-              onClick={compartir}
-              className="mt-6 w-full rounded-xl bg-slate-900 px-5 py-3 text-lg font-semibold text-white hover:bg-slate-700"
-            >
-              {copiado ? "¡Copiado! Pegalo en WhatsApp" : "💬 Copiar para compartir con mamá"}
-            </button>
+            {veredicto.nivel !== "verde" && (
+              <div className="mt-4 rounded-xl bg-white/70 p-4">
+                <h3 className="font-semibold text-slate-900">{"🚨"} Dónde denunciar</h3>
+                <p className="mt-1 text-slate-800">
+                  Si transferiste dinero o diste datos, llamá <strong>ya</strong> a tu banco por el número del dorso de tu tarjeta.
+                  Denunciá el intento en la Unidad Fiscal de Ciberdelincuencia (UFECI):{" "}
+                  <a className="underline" href="mailto:denunciasufeci@mpf.gov.ar">denunciasufeci@mpf.gov.ar</a>{" "}
+                  o en la comisaría más cercana. Línea gratuita de orientación: <strong>134</strong>.
+                </p>
+              </div>
+            )}
+
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <button
+                onClick={compartir}
+                className="flex-1 rounded-xl bg-slate-900 px-5 py-3 text-lg font-semibold text-white hover:bg-slate-700"
+              >
+                {copiado ? "¡Copiado! Pegalo en WhatsApp" : "💬 Copiar para compartir con mamá"}
+              </button>
+              {veredicto.nivel !== "verde" && (
+                <button
+                  onClick={reportar}
+                  disabled={reportado}
+                  className="rounded-xl border border-slate-400 px-5 py-3 text-lg font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-60"
+                >
+                  {reportado ? "✔️ Gracias, sumado a la base" : "🚩 Reportar estafa real"}
+                </button>
+              )}
+            </div>
           </section>
         )}
 

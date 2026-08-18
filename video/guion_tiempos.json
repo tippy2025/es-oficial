@@ -1,0 +1,50 @@
+[
+  {
+    "id": "01_golpe",
+    "escena": "Fondo oscuro. Aparece la captura del WhatsApp falso de PAMI.",
+    "texto": "Este mensaje le puede costar los ahorros a una persona. Quizás a tu mamá. Quizás a tu abuelo.",
+    "duracion": 7.22
+  },
+  {
+    "id": "02_problema",
+    "escena": "Sigue la captura; aparecen los datos en pantalla.",
+    "texto": "Las estafas ya no parecen estafas. Parecen PAMI, un banco, la empresa de luz... o tu hijo con un número nuevo. Nueve de cada diez adultos mayores en Argentina ya recibieron un intento. Y este mes, ANSES tuvo que salir a alertar oficialmente. La pregunta que miles de hijos reciben cada semana es siempre la misma: ¿esto es verdad?",
+    "duracion": 21.65
+  },
+  {
+    "id": "03_solucion",
+    "escena": "Aparece la app. Se pega el mensaje. Se toca Analizar.",
+    "texto": "Ahora hay dónde preguntar. Se llama ¿Es Oficial? Pegás el mensaje, o subís la captura... y en segundos te dice qué está pasando.",
+    "duracion": 9.5
+  },
+  {
+    "id": "04_resultado",
+    "escena": "Aparece el resultado rojo. El cursor recorre señales y qué hacer.",
+    "texto": "Alto riesgo de estafa. Y no solo eso: te dice por qué. PAMI no escribe por WhatsApp. El código del SMS no se comparte con nadie. Y te dice qué hacer ahora: no respondas, no mandes nada, bloqueá.",
+    "duracion": 15.62
+  },
+  {
+    "id": "05_canal",
+    "escena": "Zoom a la tarjeta azul: Canal oficial verificado, botón Llamar al 138.",
+    "texto": "Y acá está la diferencia: te muestra el canal oficial verificado. El teléfono real de PAMI, el 138, con un botón para llamar. No el número del mensaje: el de verdad.",
+    "duracion": 12.12
+  },
+  {
+    "id": "06_verde",
+    "escena": "Se pega el turno médico legítimo. Resultado verde.",
+    "texto": "¿Y si el mensaje es real? También te lo dice. Sin señales típicas de estafa, y cómo confirmarlo por el canal oficial. No es una máquina de gritar estafa: es una segunda opinión con criterio.",
+    "duracion": 13.42
+  },
+  {
+    "id": "07_compartir",
+    "escena": "Celular: desde WhatsApp, Compartir → ¿Es Oficial? → análisis automático. Después el botón Copiar para compartir con mamá.",
+    "texto": "Y pensado para la vida real: se instala en el celular y aparece en el menú Compartir de WhatsApp. Un toque, y el mensaje se analiza solo. Otro toque, y el resultado vuelve por WhatsApp, explicado como para contárselo a tu mamá.",
+    "duracion": 14.35
+  },
+  {
+    "id": "08_cierre",
+    "escena": "Placa final: escudo, ¿Es Oficial?, es-oficial.vercel.app",
+    "texto": "No prometemos eliminar las estafas. Prometemos algo más simple: poner una segunda opinión entre el mensaje y la transferencia. Está online, es gratis, y funciona hoy. Es oficial punto vercel punto app. Antes de responder, preguntá.",
+    "duracion": 16.63
+  }
+]

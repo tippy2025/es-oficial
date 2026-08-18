@@ -21,6 +21,19 @@ const EJEMPLOS = [
   },
 ];
 
+// Más casos para el botón "sorprendeme" (no ocupan lugar en la UI)
+const EJEMPLOS_EXTRA = [
+  "Buen día, lo llamo del área de seguridad de Banco Galicia. Detectamos una compra sospechosa de $95.000 con su tarjeta. Para cancelarla necesito que se acerque al cajero más cercano y siga mis indicaciones para generar un código de cancelación. Manténgase en línea, es urgente.",
+  "¡FELICITACIONES! Su número fue seleccionado ganador de un Samsung Galaxy S25 en el sorteo aniversario de Mercado Libre. Para recibirlo solo debe abonar el costo de envío de $4.500 en el siguiente link: bit.ly/premio-ml-2026",
+  "Hola! Perdón, te mandé por error un código de 6 dígitos por SMS, ¿me lo pasás? Es que estaba registrando mi WhatsApp nuevo y puse mal el número. Gracias!!",
+  "Hola, somos de RRHH de Amazon Argentina. Fuiste preseleccionado para trabajo remoto de carga de datos, $850.000/mes, medio tiempo. Para activar tu cuenta de trabajo necesitamos un depósito reembolsable de $25.000. Respondé SI para continuar.",
+  "CORREO ARGENTINO: Su paquete N° AR7731 quedó retenido en aduana por falta de pago de tasa ($1.890). Regularice en las próximas 24 hs o será devuelto: correo-ar-envios.top/pago",
+  "ANSES informa: usted tiene un reintegro pendiente de $48.300 por el bono de agosto. Para acreditarlo ingrese su CBU y clave de homebanking en anses-reintegros.com antes del viernes.",
+  "Hola vecino, soy la nueva administradora del consorcio. Cambiamos la cuenta para el pago de expensas, a partir de este mes transferí al alias CONSORCIO.NUEVO.2026. Cualquier duda me escribís por acá.",
+  "Andreani: tu envío 360001234567 está en camino y llegará hoy entre las 14 y las 18 hs. No es necesario que hagas nada. Podés seguirlo desde nuestra app o en andreani.com.",
+  "Hola Juan Manuel, te recordamos tu turno de Oftalmología el martes 26/08 a las 15:40 hs con la Dra. Pérez, Centro Médico Belgrano. Si necesitás cancelar, hacelo desde la app OSDE o llamando al 0810-555-6733.",
+];
+
 const COLORES: Record<string, { borde: string; fondo: string; texto: string; punto: string }> = {
   rojo: { borde: "border-red-500", fondo: "bg-red-50", texto: "text-red-800", punto: "bg-red-600" },
   amarillo: { borde: "border-amber-500", fondo: "bg-amber-50", texto: "text-amber-800", punto: "bg-amber-500" },
@@ -269,6 +282,18 @@ export default function Home() {
                   {ej.etiqueta}
                 </button>
               ))}
+              <button
+                onClick={() => {
+                  const t = EJEMPLOS_EXTRA[Math.floor(Math.random() * EJEMPLOS_EXTRA.length)];
+                  setTexto(t);
+                  setImagen(null);
+                  setVeredicto(null);
+                }}
+                className="rounded-full border border-dashed border-blue-400 px-3 py-1.5 text-sm text-blue-700 hover:bg-blue-50"
+                title="Cargar un mensaje de prueba al azar (¿estafa o real? descubrilo)"
+              >
+                {"🎲"} Sorprendeme
+              </button>
             </div>
           </div>
 
@@ -393,6 +418,8 @@ export default function Home() {
           </section>
         )}
 
+        <GuiaInstalacion />
+
         <footer className="mt-10 text-center text-xs leading-relaxed text-slate-400">
           <p>
             ¿Es Oficial? evalúa señales de riesgo con inteligencia artificial y
@@ -405,5 +432,65 @@ export default function Home() {
         </footer>
       </div>
     </main>
+  );
+}
+
+/** Guía para tener la app en el celular, según el sistema. Se oculta si ya está instalada. */
+function GuiaInstalacion() {
+  const [so, setSo] = useState<"ios" | "android" | "otro" | null>(null);
+  const [abierta, setAbierta] = useState(false);
+  const [instalada, setInstalada] = useState(false);
+
+  useEffect(() => {
+    const ua = navigator.userAgent;
+    const standalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (navigator as unknown as { standalone?: boolean }).standalone === true;
+    setInstalada(standalone);
+    if (/iPhone|iPad|iPod/i.test(ua)) setSo("ios");
+    else if (/Android/i.test(ua)) setSo("android");
+    else setSo("otro");
+  }, []);
+
+  if (instalada || so === null) return null;
+
+  const pasos =
+    so === "ios"
+      ? [
+          "Tocá el botón Compartir de Safari (el cuadrado con la flecha ↑, abajo en el centro).",
+          "Deslizá la lista hacia abajo y tocá “Agregar a inicio”.",
+          "Tocá “Agregar”. Listo: el escudo queda en tu pantalla como una app más.",
+          "Cuando te llegue un mensaje raro: mantenelo apretado → Copiar, abrí ¿Es Oficial? y pegalo. Si es una captura, guardala y subila con 📷.",
+        ]
+      : so === "android"
+        ? [
+            "Tocá el menú ⋮ de Chrome (arriba a la derecha).",
+            "Elegí “Agregar a pantalla de inicio” o “Instalar app” y confirmá.",
+            "Desde WhatsApp: mantené apretado el mensaje → Compartir → ¿Es Oficial?. Se analiza solo.",
+          ]
+        : [
+            "Desde el celular podés instalarla como app: en Android desde el menú ⋮ de Chrome; en iPhone desde el botón Compartir de Safari → “Agregar a inicio”.",
+          ];
+
+  return (
+    <section className="mt-8 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-left">
+      <button
+        onClick={() => setAbierta((v) => !v)}
+        className="flex w-full items-center justify-between text-left"
+        aria-expanded={abierta}
+      >
+        <span className="text-base font-semibold text-blue-900">
+          {"📱"} Tenela en tu celular {so === "ios" ? "(iPhone)" : so === "android" ? "(Android)" : ""}
+        </span>
+        <span className="text-blue-700">{abierta ? "▲" : "▼"}</span>
+      </button>
+      {abierta && (
+        <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm text-blue-900">
+          {pasos.map((p, i) => (
+            <li key={i}>{p}</li>
+          ))}
+        </ol>
+      )}
+    </section>
   );
 }

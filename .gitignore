@@ -42,3 +42,10 @@ next-env.d.ts
 
 .vercel
 .env*
+
+# artefactos de video
+video/tmp/
+video/escenas/
+video/voz/
+video/*.mp4
+

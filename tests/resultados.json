@@ -1,29 +1,16 @@
 [
   {
-    "id": "e02",
+    "id": "e03",
     "categoria": "estafa",
-    "tipo": "falso ANSES - bono incapacidad",
-    "texto": "ANSES: Ha sido seleccionado para recibir bono de incapacidad $18.500. Valide sus datos en www.anses-bono-nov.com.ar/activar antes del 31/8",
+    "tipo": "falso hijo - número nuevo",
+    "texto": "Hola mamá, mi teléfono se rompió, este es mi número nuevo. Agendámelo en WhatsApp rápido que necesito tu ayuda urgente",
     "esperado": "rojo",
-    "fuente": "alertas ANSES/eldestapeweb 2026",
+    "fuente": "elcaso.elnacional.cat/newtral.es 2025-2026",
     "obtenido": "rojo",
-    "titulo": "Estafa de suplantación de ANSES con dominio falso",
-    "canal": "ANSES",
-    "res": "ok",
-    "ms": 6327
-  },
-  {
-    "id": "e04",
-    "categoria": "estafa",
-    "tipo": "falso hijo - dinero urgente",
-    "texto": "Mamá, soy Lucas. No tengo saldo en la tarjeta, necesito urgente $2000 para medicinas. Transfiero a esta cuenta XXXXXXXXXXXX. Porfa no le digas a nadie",
-    "esperado": "rojo",
-    "fuente": "reportes fraude argentino 2025",
-    "obtenido": "rojo",
-    "titulo": "Suplantación de identidad: alguien se hace pasar por tu hijo",
+    "titulo": "Suplantación de identidad: patrón clásico de estafa",
     "canal": null,
     "res": "ok",
-    "ms": 6450
+    "ms": 6102
   },
   {
     "id": "e01",
@@ -33,23 +20,49 @@
     "esperado": "rojo",
     "fuente": "alertas PAMI/mdzol.com 2026",
     "obtenido": "rojo",
-    "titulo": "Suplantación de PAMI con dominio falso para robar datos",
+    "titulo": "Suplantación de PAMI: dominio falso para robar datos",
     "canal": "PAMI",
     "res": "ok",
-    "ms": 6643
+    "ms": 6738
   },
   {
-    "id": "e03",
+    "id": "e04",
     "categoria": "estafa",
-    "tipo": "falso hijo - número nuevo",
-    "texto": "Hola mamá, mi teléfono se rompió, este es mi número nuevo. Agendámelo en WhatsApp rápido que necesito tu ayuda urgente",
+    "tipo": "falso hijo - dinero urgente",
+    "texto": "Mamá, soy Lucas. No tengo saldo en la tarjeta, necesito urgente $2000 para medicinas. Transfiero a esta cuenta XXXXXXXXXXXX. Porfa no le digas a nadie",
     "esperado": "rojo",
-    "fuente": "elcaso.elnacional.cat/newtral.es 2025-2026",
+    "fuente": "reportes fraude argentino 2025",
     "obtenido": "rojo",
-    "titulo": "Probable suplantación de familiar: patrón clásico de estafa",
+    "titulo": "Probable suplantación de identidad: alguien se hace pasar por tu hijo",
     "canal": null,
     "res": "ok",
-    "ms": 6651
+    "ms": 7223
+  },
+  {
+    "id": "e02",
+    "categoria": "estafa",
+    "tipo": "falso ANSES - bono incapacidad",
+    "texto": "ANSES: Ha sido seleccionado para recibir bono de incapacidad $18.500. Valide sus datos en www.anses-bono-nov.com.ar/activar antes del 31/8",
+    "esperado": "rojo",
+    "fuente": "alertas ANSES/eldestapeweb 2026",
+    "obtenido": "rojo",
+    "titulo": "Estafa de phishing suplantando a ANSES",
+    "canal": "ANSES",
+    "res": "ok",
+    "ms": 7513
+  },
+  {
+    "id": "e05",
+    "categoria": "estafa",
+    "tipo": "falso Correo Argentino - paquete retenido",
+    "texto": "Su paquete ha llegado al centro de distribución local. Debido a información de dirección faltante o incorrecta, temporalmente no podemos realizar entregas exitosas. El paquete se encuentra retenido en nuestro centro de distribución. Para evitar una devolución, confirme su dirección de envío válida dentro de las 24 horas: www.correo-confirma.xyz",
+    "esperado": "rojo",
+    "fuente": "chequeado.com/cronista.com 2025",
+    "obtenido": "rojo",
+    "titulo": "Estafa de phishing haciéndose pasar por Correo Argentino",
+    "canal": "Correo Argentino",
+    "res": "ok",
+    "ms": 6107
   },
   {
     "id": "e06",
@@ -62,33 +75,7 @@
     "titulo": "Estafa de paquete retenido en aduana con link falso",
     "canal": "Andreani",
     "res": "ok",
-    "ms": 5319
-  },
-  {
-    "id": "e07",
-    "categoria": "estafa",
-    "tipo": "falso Banco Nación - suspensión",
-    "texto": "ALERTA: Se detecto actividad sospechosa en su cuenta. Su cuenta será suspendida en 30 minutos si no verifica su identidad. Ingrese en www.banc0-naci0n.com.ar/verify",
-    "esperado": "rojo",
-    "fuente": "cronista.com/lanacion.com.ar 2025",
-    "obtenido": "rojo",
-    "titulo": "Phishing del Banco Nación: dominio falso y urgencia artificial",
-    "canal": "Banco Nación",
-    "res": "ok",
-    "ms": 5621
-  },
-  {
-    "id": "e05",
-    "categoria": "estafa",
-    "tipo": "falso Correo Argentino - paquete retenido",
-    "texto": "Su paquete ha llegado al centro de distribución local. Debido a información de dirección faltante o incorrecta, temporalmente no podemos realizar entregas exitosas. El paquete se encuentra retenido en nuestro centro de distribución. Para evitar una devolución, confirme su dirección de envío válida dentro de las 24 horas: www.correo-confirma.xyz",
-    "esperado": "rojo",
-    "fuente": "chequeado.com/cronista.com 2025",
-    "obtenido": "rojo",
-    "titulo": "Estafa de phishing del Correo Argentino: dominio falso y urgencia artificial",
-    "canal": "Correo Argentino",
-    "res": "ok",
-    "ms": 6002
+    "ms": 5619
   },
   {
     "id": "e08",
@@ -98,10 +85,23 @@
     "esperado": "rojo",
     "fuente": "xatakamovil.com/movilzona.es 2025",
     "obtenido": "rojo",
-    "titulo": "Phishing: dominio falso que imita a BBVA",
+    "titulo": "Phishing de BBVA: dominio falso intentando robar datos bancarios",
     "canal": "BBVA",
     "res": "ok",
-    "ms": 6387
+    "ms": 5434
+  },
+  {
+    "id": "e07",
+    "categoria": "estafa",
+    "tipo": "falso Banco Nación - suspensión",
+    "texto": "ALERTA: Se detecto actividad sospechosa en su cuenta. Su cuenta será suspendida en 30 minutos si no verifica su identidad. Ingrese en www.banc0-naci0n.com.ar/verify",
+    "esperado": "rojo",
+    "fuente": "cronista.com/lanacion.com.ar 2025",
+    "obtenido": "rojo",
+    "titulo": "Phishing: dominio falso que imita Banco Nación",
+    "canal": "Banco Nación",
+    "res": "ok",
+    "ms": 5839
   },
   {
     "id": "e09",
@@ -111,36 +111,10 @@
     "esperado": "rojo",
     "fuente": "mediotiempo.com/xatakamovil.com 2025",
     "obtenido": "rojo",
-    "titulo": "Estafa de phishing suplantando a Santander",
+    "titulo": "Suplantación de Santander con link de phishing",
     "canal": "Santander",
     "res": "ok",
-    "ms": 5924
-  },
-  {
-    "id": "e10",
-    "categoria": "estafa",
-    "tipo": "falso BCRA - cuenta congelada",
-    "texto": "BANCO CENTRAL: Su cuenta bancaria ha sido congelada por sospecha de lavado de dinero. Regularice su situacion: www.bcra-verify-account.gob.ar",
-    "esperado": "rojo",
-    "fuente": "rionegro.com.ar/infobae 2026",
-    "obtenido": "rojo",
-    "titulo": "Phishing del Banco Central: dominio falso y amenaza de congelamiento",
-    "canal": null,
-    "res": "ok",
-    "ms": 6081
-  },
-  {
-    "id": "e11",
-    "categoria": "estafa",
-    "tipo": "falsa multa tránsito - SIMIT",
-    "texto": "SIMIT: Tienes multa por $45.000 sin pagar. Obtén 50% de descuento hoy. Paga aqui: pagar-multa-simit.com.ar/descuento50",
-    "esperado": "rojo",
-    "fuente": "cronista.com/lanacion.com.ar 2026",
-    "obtenido": "rojo",
-    "titulo": "Estafa de multa falsa con dominio imitación",
-    "canal": null,
-    "res": "ok",
-    "ms": 6189
+    "ms": 5378
   },
   {
     "id": "e12",
@@ -153,20 +127,33 @@
     "titulo": "Estafa de multa de tránsito con link falso",
     "canal": null,
     "res": "ok",
-    "ms": 6033
+    "ms": 5439
   },
   {
-    "id": "e14",
+    "id": "e10",
     "categoria": "estafa",
-    "tipo": "falso Netflix - cuenta suspendida",
-    "texto": "NETFLIX ALERT: Tu cuenta será suspendida por actividad sospechosa. Verifica tu identidad ahora: netflix-verify-account.com.ar",
+    "tipo": "falso BCRA - cuenta congelada",
+    "texto": "BANCO CENTRAL: Su cuenta bancaria ha sido congelada por sospecha de lavado de dinero. Regularice su situacion: www.bcra-verify-account.gob.ar",
     "esperado": "rojo",
-    "fuente": "okdiario.com/genbeta.com 2025",
+    "fuente": "rionegro.com.ar/infobae 2026",
     "obtenido": "rojo",
-    "titulo": "Phishing falso de Netflix: dominio imitación y presión urgente",
-    "canal": "Netflix",
+    "titulo": "Estafa de phishing que suplanta al Banco Central",
+    "canal": null,
     "res": "ok",
-    "ms": 5278
+    "ms": 6339
+  },
+  {
+    "id": "e11",
+    "categoria": "estafa",
+    "tipo": "falsa multa tránsito - SIMIT",
+    "texto": "SIMIT: Tienes multa por $45.000 sin pagar. Obtén 50% de descuento hoy. Paga aqui: pagar-multa-simit.com.ar/descuento50",
+    "esperado": "rojo",
+    "fuente": "cronista.com/lanacion.com.ar 2026",
+    "obtenido": "rojo",
+    "titulo": "Estafa de multa de tránsito falsa con descuento engañoso",
+    "canal": null,
+    "res": "ok",
+    "ms": 5869
   },
   {
     "id": "e15",
@@ -176,10 +163,10 @@
     "esperado": "rojo",
     "fuente": "asufin.com 2025",
     "obtenido": "rojo",
-    "titulo": "Estafa de phishing suplantando a Spotify",
+    "titulo": "Phishing: dominio falso de Spotify",
     "canal": null,
     "res": "ok",
-    "ms": 5152
+    "ms": 4700
   },
   {
     "id": "e13",
@@ -189,10 +176,23 @@
     "esperado": "rojo",
     "fuente": "infobae/xatakandroid 2025-2026",
     "obtenido": "rojo",
-    "titulo": "Estafa de suplantación de Netflix con link falso de phishing",
+    "titulo": "Phishing de Netflix: dominio falso y urgencia artificial",
     "canal": "Netflix",
     "res": "ok",
-    "ms": 6100
+    "ms": 6251
+  },
+  {
+    "id": "e14",
+    "categoria": "estafa",
+    "tipo": "falso Netflix - cuenta suspendida",
+    "texto": "NETFLIX ALERT: Tu cuenta será suspendida por actividad sospechosa. Verifica tu identidad ahora: netflix-verify-account.com.ar",
+    "esperado": "rojo",
+    "fuente": "okdiario.com/genbeta.com 2025",
+    "obtenido": "rojo",
+    "titulo": "Suplantación de Netflix: sitio falso para robar datos",
+    "canal": "Netflix",
+    "res": "ok",
+    "ms": 5740
   },
   {
     "id": "e16",
@@ -202,36 +202,10 @@
     "esperado": "rojo",
     "fuente": "infobae/iproup 2025-2026",
     "obtenido": "rojo",
-    "titulo": "Oferta de trabajo falsa, busca tus datos personales",
+    "titulo": "Oferta de trabajo falsa con pedido de datos personales por WhatsApp",
     "canal": null,
     "res": "ok",
-    "ms": 6267
-  },
-  {
-    "id": "e19",
-    "categoria": "estafa",
-    "tipo": "código WhatsApp - compartir",
-    "texto": "Hola, me llegó un código de WhatsApp por error: XXXXXX. Es tuyo? Pasame el código que recibiste para confirmar",
-    "esperado": "rojo",
-    "fuente": "infobae/fds951 2025-2026",
-    "obtenido": "rojo",
-    "titulo": "Intento de robo de tu cuenta de WhatsApp",
-    "canal": null,
-    "res": "ok",
-    "ms": 4411
-  },
-  {
-    "id": "e18",
-    "categoria": "estafa",
-    "tipo": "falsa oferta laboral - dólares diarios",
-    "texto": "GANÁ $35 USD DIARIOS desde tu casa. Sin experiencia necesaria. Inscribete aqui: trabajo-online-argentina.site/inscribirte",
-    "esperado": "rojo",
-    "fuente": "infobae 2026",
-    "obtenido": "rojo",
-    "titulo": "Estafa de trabajo falso con dominio imitación",
-    "canal": null,
-    "res": "ok",
-    "ms": 5190
+    "ms": 5893
   },
   {
     "id": "e17",
@@ -241,10 +215,36 @@
     "esperado": "rojo",
     "fuente": "iproup.com/infobae 2025",
     "obtenido": "rojo",
-    "titulo": "Oferta de trabajo falsa con urgencia y pedido de contacto por WhatsApp",
+    "titulo": "Oferta de trabajo falsa con urgencia y WhatsApp",
     "canal": null,
     "res": "ok",
-    "ms": 5514
+    "ms": 5489
+  },
+  {
+    "id": "e18",
+    "categoria": "estafa",
+    "tipo": "falsa oferta laboral - dólares diarios",
+    "texto": "GANÁ $35 USD DIARIOS desde tu casa. Sin experiencia necesaria. Inscribete aqui: trabajo-online-argentina.site/inscribirte",
+    "esperado": "rojo",
+    "fuente": "infobae 2026",
+    "obtenido": "rojo",
+    "titulo": "Estafa de oferta de trabajo falsa con dominio imitación",
+    "canal": null,
+    "res": "ok",
+    "ms": 5046
+  },
+  {
+    "id": "e19",
+    "categoria": "estafa",
+    "tipo": "código WhatsApp - compartir",
+    "texto": "Hola, me llegó un código de WhatsApp por error: XXXXXX. Es tuyo? Pasame el código que recibiste para confirmar",
+    "esperado": "rojo",
+    "fuente": "infobae/fds951 2025-2026",
+    "obtenido": "rojo",
+    "titulo": "Intento de robo de cuenta de WhatsApp",
+    "canal": null,
+    "res": "ok",
+    "ms": 5955
   },
   {
     "id": "e20",
@@ -254,10 +254,23 @@
     "esperado": "rojo",
     "fuente": "support.google.com/alertas web 2025",
     "obtenido": "rojo",
-    "titulo": "Intento de robo de cuenta: NO compartas ese código bajo ningún concepto",
+    "titulo": "Intento de robo de cuenta: no compartas el código de verificación",
     "canal": null,
     "res": "ok",
-    "ms": 5242
+    "ms": 5541
+  },
+  {
+    "id": "e22",
+    "categoria": "estafa",
+    "tipo": "préstamo pre-aprobado - billetera",
+    "texto": "BILLETERA DIGITAL: Credito $250k pre-aprobado para ti. Solicita sin aval: app-billetera-credito.com.ar/apply",
+    "esperado": "rojo",
+    "fuente": "infobae 2025",
+    "obtenido": "rojo",
+    "titulo": "Estafa de crédito falso con dominio imitación",
+    "canal": null,
+    "res": "ok",
+    "ms": 5326
   },
   {
     "id": "e21",
@@ -270,20 +283,7 @@
     "titulo": "Estafa de crédito falso con dominio imitación",
     "canal": null,
     "res": "ok",
-    "ms": 6113
-  },
-  {
-    "id": "e22",
-    "categoria": "estafa",
-    "tipo": "préstamo pre-aprobado - billetera",
-    "texto": "BILLETERA DIGITAL: Credito $250k pre-aprobado para ti. Solicita sin aval: app-billetera-credito.com.ar/apply",
-    "esperado": "rojo",
-    "fuente": "infobae 2025",
-    "obtenido": "rojo",
-    "titulo": "Estafa de crédito con dominio falso",
-    "canal": null,
-    "res": "ok",
-    "ms": 5506
+    "ms": 6085
   },
   {
     "id": "e23",
@@ -293,10 +293,10 @@
     "esperado": "rojo",
     "fuente": "genbeta.com 2025",
     "obtenido": "rojo",
-    "titulo": "Phishing: dominio falso que imita a SUBE",
+    "titulo": "Phishing que imita SUBE. No es oficial.",
     "canal": null,
     "res": "ok",
-    "ms": 5311
+    "ms": 5267
   },
   {
     "id": "e24",
@@ -306,36 +306,10 @@
     "esperado": "rojo",
     "fuente": "infobae/jujuyaldia.com.ar 2025",
     "obtenido": "rojo",
-    "titulo": "Estafa de sorteo falso con link phishing",
+    "titulo": "Estafa de sorteo falso con dominio imitación",
     "canal": null,
     "res": "ok",
-    "ms": 5885
-  },
-  {
-    "id": "e26",
-    "categoria": "estafa",
-    "tipo": "sorteo falso - iPhone",
-    "texto": "Ganaste un IPHONE 16! Click para reclamar: www.iphone-premio-gratis.com.ar/reclamo?ref=XXXXX",
-    "esperado": "rojo",
-    "fuente": "reportes comunidad 2025",
-    "obtenido": "rojo",
-    "titulo": "Estafa de premios falsos con phishing",
-    "canal": null,
-    "res": "ok",
-    "ms": 4784
-  },
-  {
-    "id": "e27",
-    "categoria": "estafa",
-    "tipo": "Mercado Pago - falso reembolso",
-    "texto": "MERCADO PAGO: Te acreditamos $850 por compra de más. Confirma recepción: www.mp-confirm-refund.com.ar",
-    "esperado": "rojo",
-    "fuente": "lagaceta.com.ar/iprofesional.com 2025",
-    "obtenido": "rojo",
-    "titulo": "Phishing de Mercado Pago: dominio falso y trampa de confirmación",
-    "canal": "Mercado Pago",
-    "res": "ok",
-    "ms": 4789
+    "ms": 5597
   },
   {
     "id": "e25",
@@ -348,7 +322,33 @@
     "titulo": "Estafa de sorteo falso con dominio imitación",
     "canal": null,
     "res": "ok",
-    "ms": 5839
+    "ms": 4896
+  },
+  {
+    "id": "e26",
+    "categoria": "estafa",
+    "tipo": "sorteo falso - iPhone",
+    "texto": "Ganaste un IPHONE 16! Click para reclamar: www.iphone-premio-gratis.com.ar/reclamo?ref=XXXXX",
+    "esperado": "rojo",
+    "fuente": "reportes comunidad 2025",
+    "obtenido": "rojo",
+    "titulo": "Estafa de premio falso con phishing",
+    "canal": null,
+    "res": "ok",
+    "ms": 6040
+  },
+  {
+    "id": "e27",
+    "categoria": "estafa",
+    "tipo": "Mercado Pago - falso reembolso",
+    "texto": "MERCADO PAGO: Te acreditamos $850 por compra de más. Confirma recepción: www.mp-confirm-refund.com.ar",
+    "esperado": "rojo",
+    "fuente": "lagaceta.com.ar/iprofesional.com 2025",
+    "obtenido": "rojo",
+    "titulo": "Phishing de Mercado Pago: dominio falso para robar datos",
+    "canal": "Mercado Pago",
+    "res": "ok",
+    "ms": 5765
   },
   {
     "id": "e28",
@@ -358,10 +358,10 @@
     "esperado": "rojo",
     "fuente": "laopinionline.ar 2025",
     "obtenido": "rojo",
-    "titulo": "Phishing de Mercado Pago: dominio falso y táctica de urgencia",
+    "titulo": "Phishing de Mercado Pago: dominio falso y urgencia artificial",
     "canal": "Mercado Pago",
     "res": "ok",
-    "ms": 5591
+    "ms": 5484
   },
   {
     "id": "e29",
@@ -371,10 +371,10 @@
     "esperado": "rojo",
     "fuente": "criptonoticias.com/lanacion.com.ar 2025",
     "obtenido": "rojo",
-    "titulo": "Estafa de inversión en criptomonedas con retornos garantizados",
+    "titulo": "Estafa de inversión en criptomonedas con retornos falsos garantizados",
     "canal": null,
     "res": "ok",
-    "ms": 5429
+    "ms": 5440
   },
   {
     "id": "e30",
@@ -384,36 +384,10 @@
     "esperado": "rojo",
     "fuente": "mpba.gov.ar 2025",
     "obtenido": "rojo",
-    "titulo": "Estafa de inversión con retornos garantizados falsos",
+    "titulo": "Estafa de inversión fraudulenta con retornos garantizados",
     "canal": null,
     "res": "ok",
-    "ms": 5514
-  },
-  {
-    "id": "e31",
-    "categoria": "estafa",
-    "tipo": "secuestro virtual - hijo",
-    "texto": "PAPÁ AYUDA! Me secuestraron. Deposita $50.000 en la billetera XXXXXXXXXXXX. No llames a la policía o me matan",
-    "esperado": "rojo",
-    "fuente": "infobae/mendoza.gov.ar 2026",
-    "obtenido": "rojo",
-    "titulo": "Suplantación de familiar con extorsión urgente: estafa clásica",
-    "canal": null,
-    "res": "ok",
-    "ms": 5933
-  },
-  {
-    "id": "e33",
-    "categoria": "estafa",
-    "tipo": "suplantación familiar - hermano",
-    "texto": "Boludo necesito un favor urgente, presté dinero a un amigo y no puede pagar. Me pasa la transferencia de $5000? Después te lo devuelvo",
-    "esperado": "rojo",
-    "fuente": "reportes fraude 2025",
-    "obtenido": "rojo",
-    "titulo": "Suplantación de identidad: alguien se hace pasar por un conocido para pedir dinero",
-    "canal": null,
-    "res": "ok",
-    "ms": 4750
+    "ms": 5178
   },
   {
     "id": "e32",
@@ -423,10 +397,36 @@
     "esperado": "rojo",
     "fuente": "diariodecuyo.com.ar 2022-2026",
     "obtenido": "rojo",
-    "titulo": "Suplantación de identidad + extorsión criminal (secuestro virtual)",
+    "titulo": "Extorsión y suplantación de identidad. ESTAFA GRAVE.",
     "canal": null,
     "res": "ok",
-    "ms": 7597
+    "ms": 6293
+  },
+  {
+    "id": "e31",
+    "categoria": "estafa",
+    "tipo": "secuestro virtual - hijo",
+    "texto": "PAPÁ AYUDA! Me secuestraron. Deposita $50.000 en la billetera XXXXXXXXXXXX. No llames a la policía o me matan",
+    "esperado": "rojo",
+    "fuente": "infobae/mendoza.gov.ar 2026",
+    "obtenido": "rojo",
+    "titulo": "Suplantación de identidad y extorsión: patrón clásico de secuestro virtual",
+    "canal": null,
+    "res": "ok",
+    "ms": 7441
+  },
+  {
+    "id": "e33",
+    "categoria": "estafa",
+    "tipo": "suplantación familiar - hermano",
+    "texto": "Boludo necesito un favor urgente, presté dinero a un amigo y no puede pagar. Me pasa la transferencia de $5000? Después te lo devuelvo",
+    "esperado": "rojo",
+    "fuente": "reportes fraude 2025",
+    "obtenido": "rojo",
+    "titulo": "Probable suplantación: alguien se hace pasar por un conocido para sacarte plata",
+    "canal": null,
+    "res": "ok",
+    "ms": 6468
   },
   {
     "id": "e34",
@@ -436,10 +436,10 @@
     "esperado": "rojo",
     "fuente": "alertas fraude Argentina 2025",
     "obtenido": "rojo",
-    "titulo": "Probable suplantación de identidad (patrón clásico de estafa)",
+    "titulo": "Probable suplantación de identidad: mensaje clásico de estafa por cuenta clonada",
     "canal": null,
     "res": "ok",
-    "ms": 5020
+    "ms": 5516
   },
   {
     "id": "e35",
@@ -449,10 +449,10 @@
     "esperado": "rojo",
     "fuente": "diariodecuyo.com.ar/lagaceta.com.ar 2025",
     "obtenido": "rojo",
-    "titulo": "Suplantación de identidad: patrón clásico de estafa por cambio de número",
+    "titulo": "Probable suplantación de identidad con pedido de transferencia",
     "canal": null,
     "res": "ok",
-    "ms": 5703
+    "ms": 5754
   },
   {
     "id": "e36",
@@ -462,10 +462,10 @@
     "esperado": "rojo",
     "fuente": "chequeado.com 2025-2026",
     "obtenido": "rojo",
-    "titulo": "Dominio falso que imita a un organismo oficial: estafa de phishing",
+    "titulo": "Estafa de sorteo falso con dominio imitación",
     "canal": null,
     "res": "ok",
-    "ms": 5504
+    "ms": 4791
   },
   {
     "id": "e37",
@@ -476,9 +476,9 @@
     "fuente": "chequeado.com 2025",
     "obtenido": "rojo",
     "titulo": "Estafa de bono falso con dominio imitación",
-    "canal": "ANSES",
+    "canal": null,
     "res": "ok",
-    "ms": 5836
+    "ms": 5565
   },
   {
     "id": "e38",
@@ -488,10 +488,23 @@
     "esperado": "rojo",
     "fuente": "argentina.gob.ar alertas 2025",
     "obtenido": "rojo",
-    "titulo": "Phishing de bono social falso con dominio imitación",
+    "titulo": "Estafa de bono social falso con dominio imitación",
     "canal": "ANSES",
     "res": "ok",
-    "ms": 6605
+    "ms": 5589
+  },
+  {
+    "id": "e40",
+    "categoria": "estafa",
+    "tipo": "falso reintegro impuestos AFIP",
+    "texto": "AFIP: Tu reintegro de impuestos está listo. Tienes $15.000 disponibles. Reclama: www.afip-reintegro.gob.ar/cobrar",
+    "esperado": "rojo",
+    "fuente": "alertas AFIP 2025",
+    "obtenido": "rojo",
+    "titulo": "Suplantación de ARCA (ex AFIP) con dominio falso y phishing",
+    "canal": "ARCA (ex AFIP)",
+    "res": "ok",
+    "ms": 5430
   },
   {
     "id": "e39",
@@ -501,10 +514,10 @@
     "esperado": "rojo",
     "fuente": "reportes seguridad 2025",
     "obtenido": "rojo",
-    "titulo": "Estafa de phishing: dominio falso que imita una billetera",
+    "titulo": "Dominio falso imitando billetera, oferta sospechosa sin verificación",
     "canal": null,
     "res": "ok",
-    "ms": 4858
+    "ms": 5787
   },
   {
     "id": "l01",
@@ -515,9 +528,9 @@
     "fuente": "correoargentino.com.ar 2025",
     "obtenido": "verde",
     "titulo": "Aviso de entrega legítimo del Correo Argentino",
-    "canal": null,
+    "canal": "Correo Argentino",
     "res": "ok",
-    "ms": 2772
+    "ms": 2777
   },
   {
     "id": "l02",
@@ -527,23 +540,10 @@
     "esperado": "verde",
     "fuente": "andreani.com.ar 2025",
     "obtenido": "verde",
-    "titulo": "Mensaje de seguimiento de envío legítimo",
-    "canal": "Andreani",
-    "res": "ok",
-    "ms": 4024
-  },
-  {
-    "id": "l03",
-    "categoria": "legitimo",
-    "tipo": "Mercado Libre - compra realizada",
-    "texto": "Mercado Libre: Tu compra fue confirmada. Artículo: Celular Samsung. Seguimiento: https://www.mercadolibre.com.ar/orders/XXXXX",
-    "esperado": "verde",
-    "fuente": "mercadolibre.com.ar 2025",
-    "obtenido": "verde",
-    "titulo": "Confirmación de compra legítima de Mercado Libre",
+    "titulo": "Mensaje legítimo de Andreani sobre seguimiento de envío",
     "canal": null,
     "res": "ok",
-    "ms": 3901
+    "ms": 2884
   },
   {
     "id": "l04",
@@ -553,23 +553,10 @@
     "esperado": "verde",
     "fuente": "mercadolibre.com.ar 2025",
     "obtenido": "verde",
-    "titulo": "Mensaje legítimo de Mercado Libre sobre envío de compra",
-    "canal": null,
+    "titulo": "Notificación legítima de Mercado Libre sobre envío",
+    "canal": "Mercado Libre",
     "res": "ok",
-    "ms": 2713
-  },
-  {
-    "id": "e40",
-    "categoria": "estafa",
-    "tipo": "falso reintegro impuestos AFIP",
-    "texto": "AFIP: Tu reintegro de impuestos está listo. Tienes $15.000 disponibles. Reclama: www.afip-reintegro.gob.ar/cobrar",
-    "esperado": "rojo",
-    "fuente": "alertas AFIP 2025",
-    "obtenido": "rojo",
-    "titulo": "Phishing que imita a AFIP/ARCA con dominio falso",
-    "canal": "ARCA (ex AFIP)",
-    "res": "ok",
-    "ms": 6210
+    "ms": 2895
   },
   {
     "id": "l05",
@@ -582,20 +569,20 @@
     "titulo": "Recordatorio de turno médico legítimo",
     "canal": null,
     "res": "ok",
-    "ms": 3147
+    "ms": 2965
   },
   {
-    "id": "l08",
+    "id": "l03",
     "categoria": "legitimo",
-    "tipo": "código verificación WhatsApp",
-    "texto": "Tu código de verificación de WhatsApp es: XXXXXX. No lo compartas con nadie. NO pediremos este código por ningún medio",
+    "tipo": "Mercado Libre - compra realizada",
+    "texto": "Mercado Libre: Tu compra fue confirmada. Artículo: Celular Samsung. Seguimiento: https://www.mercadolibre.com.ar/orders/XXXXX",
     "esperado": "verde",
-    "fuente": "WhatsApp oficial 2025",
+    "fuente": "mercadolibre.com.ar 2025",
     "obtenido": "verde",
-    "titulo": "Mensaje legítimo de WhatsApp",
-    "canal": null,
+    "titulo": "Mensaje de confirmación de compra legítimo",
+    "canal": "Mercado Libre",
     "res": "ok",
-    "ms": 3349
+    "ms": 4485
   },
   {
     "id": "l06",
@@ -605,10 +592,10 @@
     "esperado": "verde",
     "fuente": "bna.com.ar 2025",
     "obtenido": "verde",
-    "titulo": "Alerta de compra legítima del Banco Nación",
+    "titulo": "Alerta legítima de compra del Banco Nación",
     "canal": "Banco Nación",
     "res": "ok",
-    "ms": 4046
+    "ms": 3801
   },
   {
     "id": "l07",
@@ -621,7 +608,20 @@
     "titulo": "Notificación legítima de movimiento bancario",
     "canal": "Banco Galicia",
     "res": "ok",
-    "ms": 3732
+    "ms": 3895
+  },
+  {
+    "id": "l08",
+    "categoria": "legitimo",
+    "tipo": "código verificación WhatsApp",
+    "texto": "Tu código de verificación de WhatsApp es: XXXXXX. No lo compartas con nadie. NO pediremos este código por ningún medio",
+    "esperado": "verde",
+    "fuente": "WhatsApp oficial 2025",
+    "obtenido": "verde",
+    "titulo": "SMS legítimo de WhatsApp para verificar tu cuenta",
+    "canal": null,
+    "res": "ok",
+    "ms": 3659
   },
   {
     "id": "l09",
@@ -634,7 +634,7 @@
     "titulo": "SMS automático legítimo de Google",
     "canal": null,
     "res": "ok",
-    "ms": 3861
+    "ms": 3524
   },
   {
     "id": "l10",
@@ -644,23 +644,10 @@
     "esperado": "verde",
     "fuente": "netflix.com 2025",
     "obtenido": "verde",
-    "titulo": "Notificación de renovación de suscripción legítima",
-    "canal": "Netflix",
+    "titulo": "Aviso de renovación legítimo de Netflix",
+    "canal": null,
     "res": "ok",
-    "ms": 3453
-  },
-  {
-    "id": "l11",
-    "categoria": "legitimo",
-    "tipo": "factura vencimiento Edenor",
-    "texto": "EDENOR: Tu factura venció el 31/8. Saldo: $3.450. Puedes pagar en www.edenor.com.ar o en cualquier sucursal del Banco Nación",
-    "esperado": "verde",
-    "fuente": "edenor.com.ar 2025",
-    "obtenido": "verde",
-    "titulo": "Mensaje de cobro de Edenor que no presenta señales típicas de estafa",
-    "canal": "Edenor",
-    "res": "ok",
-    "ms": 4146
+    "ms": 3355
   },
   {
     "id": "l12",
@@ -670,10 +657,10 @@
     "esperado": "verde",
     "fuente": "edesur.com.ar 2025",
     "obtenido": "verde",
-    "titulo": "Mensaje de EDESUR legítimo: factura de agosto lista",
+    "titulo": "Mensaje de factura de Edesur sin señales de estafa detectadas",
     "canal": "Edesur",
     "res": "ok",
-    "ms": 4157
+    "ms": 3502
   },
   {
     "id": "l13",
@@ -683,10 +670,23 @@
     "esperado": "verde",
     "fuente": "metrogas.com.ar 2025",
     "obtenido": "verde",
-    "titulo": "Mensaje legítimo de aviso de factura de Metrogas",
+    "titulo": "Aviso de factura legítimo de Metrogas",
     "canal": null,
     "res": "ok",
-    "ms": 2699
+    "ms": 3560
+  },
+  {
+    "id": "l11",
+    "categoria": "legitimo",
+    "tipo": "factura vencimiento Edenor",
+    "texto": "EDENOR: Tu factura venció el 31/8. Saldo: $3.450. Puedes pagar en www.edenor.com.ar o en cualquier sucursal del Banco Nación",
+    "esperado": "verde",
+    "fuente": "edenor.com.ar 2025",
+    "obtenido": "verde",
+    "titulo": "Aviso de factura vencida que coincide con el patrón oficial de Edenor",
+    "canal": null,
+    "res": "ok",
+    "ms": 4658
   },
   {
     "id": "l14",
@@ -699,7 +699,7 @@
     "titulo": "Mensaje legítimo de ANSES sobre estado de jubilación",
     "canal": "ANSES",
     "res": "ok",
-    "ms": 4135
+    "ms": 3722
   },
   {
     "id": "a01",
@@ -709,36 +709,10 @@
     "esperado": "amarillo",
     "fuente": "reportes cobranza Argentina 2025",
     "obtenido": "amarillo",
-    "titulo": "Posible estafa de cobranza falsa, pero sin señales definitivas",
+    "titulo": "Posible estafa de cobranza falsa, pero sin señales de phishing inmediato",
     "canal": null,
     "res": "ok",
-    "ms": 5616
-  },
-  {
-    "id": "a02",
-    "categoria": "ambiguo",
-    "tipo": "cobranza telefónica - insistente",
-    "texto": "Te llamamos por deuda del 2024 en tu tarjeta. Necesitamos que abonaes AHORA o vamos a tomar acciones. Comunicate",
-    "esperado": "amarillo",
-    "fuente": "reclamos COPREC 2025",
-    "obtenido": "rojo",
-    "titulo": "Llamado de cobranza fraudulento con urgencia forzada",
-    "canal": null,
-    "res": "ok",
-    "ms": 6366
-  },
-  {
-    "id": "a03",
-    "categoria": "ambiguo",
-    "tipo": "promoción spam - insistente",
-    "texto": "OFERTA ESPECIAL: Obtén 60% descuento en Claro. Agregá un línea NUEVA y paga solo $299/mes. Válido 48hs. Click aqui",
-    "esperado": "amarillo",
-    "fuente": "campañas comerciales 2025",
-    "obtenido": "amarillo",
-    "titulo": "Posible oferta legítima, pero con señales de cuidado",
-    "canal": "Claro",
-    "res": "ok",
-    "ms": 5686
+    "ms": 5232
   },
   {
     "id": "a04",
@@ -748,10 +722,36 @@
     "esperado": "amarillo",
     "fuente": "bbva.com.ar 2025",
     "obtenido": "amarillo",
-    "titulo": "Mensaje de banco con señales que necesitan verificación",
+    "titulo": "Promoción de banco que necesita verificación directa",
     "canal": "BBVA",
     "res": "ok",
-    "ms": 5834
+    "ms": 4922
+  },
+  {
+    "id": "a02",
+    "categoria": "ambiguo",
+    "tipo": "cobranza telefónica - insistente",
+    "texto": "Te llamamos por deuda del 2024 en tu tarjeta. Necesitamos que abonaes AHORA o vamos a tomar acciones. Comunicate",
+    "esperado": "amarillo",
+    "fuente": "reclamos COPREC 2025",
+    "obtenido": "amarillo",
+    "titulo": "Posible estafa, pero falta contexto sobre quién llamó y qué tarjeta",
+    "canal": null,
+    "res": "ok",
+    "ms": 5989
+  },
+  {
+    "id": "a03",
+    "categoria": "ambiguo",
+    "tipo": "promoción spam - insistente",
+    "texto": "OFERTA ESPECIAL: Obtén 60% descuento en Claro. Agregá un línea NUEVA y paga solo $299/mes. Válido 48hs. Click aqui",
+    "esperado": "amarillo",
+    "fuente": "campañas comerciales 2025",
+    "obtenido": "amarillo",
+    "titulo": "Oferta de Claro con señales de sospecha: verificá el origen antes de hacer clic",
+    "canal": "Claro",
+    "res": "ok",
+    "ms": 6314
   },
   {
     "id": "a05",
@@ -761,23 +761,10 @@
     "esperado": "amarillo",
     "fuente": "sorteos comerciales Argentina 2025",
     "obtenido": "rojo",
-    "titulo": "Sorteo falso de Claro: estafa clásica",
+    "titulo": "Sorteo falso de Claro: estafa para robar datos personales",
     "canal": "Claro",
     "res": "ok",
-    "ms": 6137
-  },
-  {
-    "id": "a06",
-    "categoria": "ambiguo",
-    "tipo": "encuesta compensada",
-    "texto": "Ganate $500: Completa encuesta de 5 minutos sobre servicios telefónicos. Entra: survey-argentina.com/gana500",
-    "esperado": "amarillo",
-    "fuente": "encuestas comerciales 2025",
-    "obtenido": "rojo",
-    "titulo": "Estafa de encuesta falsa con premio para robar datos",
-    "canal": null,
-    "res": "ok",
-    "ms": 5801
+    "ms": 5543
   },
   {
     "id": "a07",
@@ -787,10 +774,23 @@
     "esperado": "amarillo",
     "fuente": "servicios online argentina 2025",
     "obtenido": "amarillo",
-    "titulo": "Mensaje sospechoso de vencimiento de suscripción: falta contexto para confirmar",
+    "titulo": "Mensaje de renovación sospechoso: falta contexto de qué servicio es",
     "canal": null,
     "res": "ok",
-    "ms": 5502
+    "ms": 4487
+  },
+  {
+    "id": "a06",
+    "categoria": "ambiguo",
+    "tipo": "encuesta compensada",
+    "texto": "Ganate $500: Completa encuesta de 5 minutos sobre servicios telefónicos. Entra: survey-argentina.com/gana500",
+    "esperado": "amarillo",
+    "fuente": "encuestas comerciales 2025",
+    "obtenido": "rojo",
+    "titulo": "Estafa de encuesta falsa con sitio imitado",
+    "canal": null,
+    "res": "ok",
+    "ms": 5036
   },
   {
     "id": "a08",
@@ -800,10 +800,23 @@
     "esperado": "amarillo",
     "fuente": "phishing educativo 2025",
     "obtenido": "rojo",
-    "titulo": "Phishing de Mercado Libre: dominio falso",
+    "titulo": "Phishing: dominio falso de Mercado Libre",
     "canal": "Mercado Libre",
     "res": "ok",
-    "ms": 5725
+    "ms": 5334
+  },
+  {
+    "id": "k01",
+    "categoria": "estafa",
+    "tipo": "falso banco por teléfono",
+    "texto": "Buen día, lo llamo del área de seguridad de Banco Galicia. Detectamos una compra sospechosa de $95.000 con su tarjeta. Para cancelarla necesito que se acerque al cajero más cercano y siga mis indicaciones para generar un código de cancelación. Manténgase en línea, es urgente.",
+    "esperado": "rojo",
+    "fuente": "kit propio",
+    "obtenido": "rojo",
+    "titulo": "Estafa clásica de suplantación bancaria: te piden ir al cajero guiado por teléfono",
+    "canal": "Banco Galicia",
+    "res": "ok",
+    "ms": 5879
   },
   {
     "id": "k03",
@@ -816,7 +829,7 @@
     "titulo": "Intento de robo de cuenta de WhatsApp",
     "canal": null,
     "res": "ok",
-    "ms": 5644
+    "ms": 5155
   },
   {
     "id": "k02",
@@ -826,23 +839,10 @@
     "esperado": "rojo",
     "fuente": "kit propio",
     "obtenido": "rojo",
-    "titulo": "Estafa de sorteo falso con link acortado y pedido de dinero",
+    "titulo": "Estafa clásica de sorteo falso con link acortado",
     "canal": "Mercado Libre",
     "res": "ok",
-    "ms": 6179
-  },
-  {
-    "id": "k01",
-    "categoria": "estafa",
-    "tipo": "falso banco por teléfono",
-    "texto": "Buen día, lo llamo del área de seguridad de Banco Galicia. Detectamos una compra sospechosa de $95.000 con su tarjeta. Para cancelarla necesito que se acerque al cajero más cercano y siga mis indicaciones para generar un código de cancelación. Manténgase en línea, es urgente.",
-    "esperado": "rojo",
-    "fuente": "kit propio",
-    "obtenido": "rojo",
-    "titulo": "Estafa clásica: falso banco pidiendo que vaya al cajero guiado por teléfono",
-    "canal": "Banco Galicia",
-    "res": "ok",
-    "ms": 6836
+    "ms": 5619
   },
   {
     "id": "k04",
@@ -852,10 +852,10 @@
     "esperado": "rojo",
     "fuente": "kit propio",
     "obtenido": "rojo",
-    "titulo": "Estafa laboral clásica: piden depósito inicial para \"activar\" un trabajo",
+    "titulo": "Oferta de trabajo falsa con depósito inicial: estafa clásica",
     "canal": null,
     "res": "ok",
-    "ms": 5723
+    "ms": 5333
   },
   {
     "id": "k07",
@@ -868,7 +868,7 @@
     "titulo": "Recordatorio de turno legítimo del Hospital Italiano",
     "canal": null,
     "res": "ok",
-    "ms": 3176
+    "ms": 3322
   },
   {
     "id": "k08",
@@ -878,10 +878,10 @@
     "esperado": "verde",
     "fuente": "kit propio",
     "obtenido": "verde",
-    "titulo": "Aviso de entrega legítimo de Andreani",
-    "canal": null,
+    "titulo": "Mensaje legítimo de seguimiento de envío",
+    "canal": "Andreani",
     "res": "ok",
-    "ms": 2748
+    "ms": 2616
   },
   {
     "id": "k06",
@@ -891,10 +891,10 @@
     "esperado": "amarillo",
     "fuente": "kit propio",
     "obtenido": "amarillo",
-    "titulo": "Cambio de alias de pago: verificá antes de transferir",
+    "titulo": "Cambio de cuenta de consorcio: verificá antes de transferir",
     "canal": null,
     "res": "ok",
-    "ms": 5167
+    "ms": 4940
   },
   {
     "id": "k05",
@@ -907,7 +907,7 @@
     "titulo": "Suplantación de ANSES: phishing para robar datos bancarios",
     "canal": "ANSES",
     "res": "ok",
-    "ms": 6394
+    "ms": 5063
   },
   {
     "id": "k09",
@@ -920,6 +920,6 @@
     "titulo": "Recordatorio de turno médico legítimo",
     "canal": null,
     "res": "ok",
-    "ms": 2880
+    "ms": 3421
   }
 ]

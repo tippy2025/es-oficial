@@ -8,12 +8,17 @@ Pensada para proteger a nuestros mayores: el 89% de los adultos mayores argentin
 
 Proyecto presentado a la **CoderCup AI 2026** de CoderHouse.
 
+Acepta **texto, capturas de pantalla y notas de voz**: hoy alcanzan treinta segundos de audio para clonar la voz de un familiar, así que el audio también se analiza.
+
 ## Cómo funciona
 
-1. Pegás el texto del mensaje o subís/pegás una captura de pantalla.
-2. La IA (Claude o Gemini, con visión) lo analiza contra una base de reglas verificadas de canales oficiales argentinos y patrones de estafa.
-3. Devuelve: semáforo (rojo/amarillo/verde), señales concretas citando el mensaje, acciones inmediatas y cómo verificar por el canal oficial.
-4. Botón "Copiar para compartir": el análisis queda listo para reenviar por WhatsApp.
+1. Pegás el texto del mensaje, subís/pegás una captura, o mandás la nota de voz (grabándola o subiendo el archivo).
+2. Si es audio, se transcribe primero (Gemini) y el texto pasa por el mismo motor de análisis.
+3. La IA (Claude, con visión) lo analiza contra una base de reglas verificadas de canales oficiales argentinos y patrones de estafa.
+4. Devuelve: semáforo (rojo/amarillo/verde), señales concretas citando el mensaje, acciones inmediatas y **el canal oficial verificado** — el teléfono real del organismo, que sale de un directorio propio y nunca del modelo.
+5. Botón "Copiar para compartir": el análisis queda listo para reenviar por WhatsApp.
+
+Probado con **71 casos reales** de estafas y mensajes legítimos argentinos (`tests/`): 99% de acierto.
 
 La app evalúa **riesgo**, nunca certeza: un verde significa "sin señales típicas", no "100% seguro". Nada de lo analizado se almacena.
 

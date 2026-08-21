@@ -1,19 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Atkinson_Hyperlegible, Fraunces } from "next/font/google";
+import { Montserrat } from "next/font/google";
 import "./globals.css";
 
-// Cuerpo: diseñada por el Braille Institute para máxima legibilidad (adultos mayores, baja visión).
-const atkinson = Atkinson_Hyperlegible({
-  variable: "--font-atkinson",
-  weight: ["400", "700"],
-  subsets: ["latin"],
-  display: "swap",
-});
-
-// Títulos: serif con carácter institucional y cálido, para que no se vea genérico.
-const fraunces = Fraunces({
-  variable: "--font-titulo",
-  weight: ["600", "700"],
+// Montserrat es la tipografía del sistema de diseño del Estado argentino (Poncho):
+// es la que el ojo asocia con "trámite oficial". La usamos en tamaños grandes
+// para que sea cómoda de leer para adultos mayores.
+const montserrat = Montserrat({
+  variable: "--font-app",
+  weight: ["400", "500", "600", "700", "800"],
   subsets: ["latin"],
   display: "swap",
 });
@@ -21,7 +15,7 @@ const fraunces = Fraunces({
 const URL_BASE = "https://es-oficial.vercel.app";
 const TITULO = "¿Es Oficial? — Antes de responder, preguntá";
 const DESCRIPCION =
-  "¿Te llegó un mensaje raro? Pegalo o subí la captura y te decimos en segundos si tiene señales de estafa, qué hacer, y el teléfono real del organismo para verificar.";
+  "¿Te llegó un mensaje raro? Pegalo, subí la captura o mandá el audio y te decimos en segundos si tiene señales de estafa, qué hacer, y el teléfono real del organismo para verificar.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(URL_BASE),
@@ -29,7 +23,7 @@ export const metadata: Metadata = {
   description: DESCRIPCION,
   manifest: "/manifest.json",
   applicationName: "¿Es Oficial?",
-  appleWebApp: { capable: true, title: "¿Es Oficial?", statusBarStyle: "default" },
+  appleWebApp: { capable: true, title: "¿Es Oficial?", statusBarStyle: "black-translucent" },
   icons: {
     icon: [{ url: "/icon-192.png", sizes: "192x192", type: "image/png" }],
     apple: "/apple-icon.png",
@@ -52,18 +46,17 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0b3d91",
+  themeColor: "#232D4F",
   width: "device-width",
   initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="es-AR"
-      className={`${atkinson.variable} ${fraunces.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="es-AR" className={`${montserrat.variable} h-full antialiased`}>
+      <body className="min-h-full">{children}</body>
     </html>
   );
 }

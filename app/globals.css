@@ -1,109 +1,160 @@
 @import "tailwindcss";
 
+/*
+ * Paleta tomada del sistema de diseño del Estado argentino (Poncho),
+ * para que a la gente le resulte familiar: es el mismo lenguaje visual
+ * de argentina.gob.ar, ANSES y PAMI, pero sin los degradés y las sombras
+ * duras que hacen que esas apps se vean viejas.
+ */
 :root {
-  --background: #f4f6fb;
-  --foreground: #0f172a;
+  --azul: #232d4f; /* arg-azul: header y navegación */
+  --azul-800: #1a2340;
+  --cobalto: #3e5a7e;
+  --cielo: #0767a7; /* enlaces y acciones */
+  --cielo-claro: #039be5;
+  --celeste: #75aadb; /* celeste de la bandera */
 
-  --brand: #0b3d91;
-  --brand-600: #1d4ed8;
-  --brand-tint: #eef3fd;
+  --niebla: #f2f2f2; /* fondo general */
+  --borde: #dee2e6;
+  --gris: #5a6472;
+  --tinta: #141414;
 
-  /* Semánticos: misma temperatura que el navy de marca */
-  --danger: #b91c1c;
-  --danger-bg: #fef4f4;
-  --danger-line: #dc2626;
-  --warn: #92400e;
-  --warn-bg: #fffbeb;
-  --warn-line: #d97706;
-  --ok: #14602f;
-  --ok-bg: #f2fbf4;
-  --ok-line: #16a34a;
+  --peligro: #c62828;
+  --peligro-bg: #fdf3f3;
+  --alerta: #b26a00;
+  --alerta-bg: #fff8ea;
+  --ok: #2e7d33;
+  --ok-bg: #f1f8f1;
+
+  --alto-barra: 3.5rem;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-brand: var(--brand);
-  --color-brand-600: var(--brand-600);
-  --font-sans: var(--font-atkinson);
-  --font-titulo: var(--font-titulo), Georgia, serif;
-}
-
-.font-titulo {
-  font-family: var(--font-titulo), Georgia, serif;
-  letter-spacing: -0.015em;
+  --color-background: var(--niebla);
+  --color-foreground: var(--tinta);
+  --color-azul: var(--azul);
+  --color-cielo: var(--cielo);
+  --color-celeste: var(--celeste);
+  --font-sans: var(--font-app);
 }
 
 html {
   color-scheme: light;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-atkinson), system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: var(--niebla);
+  color: var(--tinta);
+  font-family: var(--font-app), system-ui, -apple-system, "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
+  overscroll-behavior-y: none;
 }
 
-/* --- Detalles finos --- */
+/* --- Que se sienta app y no página web --- */
 * {
   -webkit-tap-highlight-color: transparent;
 }
 
+button,
+a,
+summary,
+label,
+[role="button"] {
+  touch-action: manipulation;
+}
+
+button,
+a,
+summary,
+label {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* El contenido que el usuario sí puede seleccionar */
+p,
+li,
+blockquote,
+textarea,
+input {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
 ::selection {
-  background: var(--brand-600);
-  color: #fff;
+  background: var(--celeste);
+  color: var(--azul);
 }
 
 ::-webkit-scrollbar {
   width: 10px;
-  height: 10px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #c7d2e3;
+  background: #c8ced8;
   border-radius: 999px;
-  border: 2px solid var(--background);
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #a9b8ce;
+  border: 3px solid var(--niebla);
 }
 
 :focus-visible {
-  outline: 3px solid var(--brand-600);
+  outline: 3px solid var(--cielo-claro);
   outline-offset: 2px;
-  border-radius: 6px;
+  border-radius: 8px;
 }
 
 button,
 a,
 summary {
   transition:
-    background-color 160ms ease,
-    color 160ms ease,
-    border-color 160ms ease,
-    box-shadow 160ms ease,
-    transform 120ms ease,
-    opacity 160ms ease;
+    background-color 150ms ease,
+    color 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    transform 100ms ease,
+    opacity 150ms ease;
 }
 
-/* Sombra en capas: se ve mucho más real que una sola sombra difusa */
-.sombra-carta {
-  box-shadow:
-    0 1px 2px rgba(15, 23, 42, 0.04),
-    0 4px 12px -2px rgba(15, 23, 42, 0.06),
-    0 12px 32px -8px rgba(15, 23, 42, 0.08);
+.pulsable:active {
+  transform: scale(0.98);
+  opacity: 0.9;
 }
-.sombra-alta {
-  box-shadow:
-    0 2px 4px rgba(11, 61, 145, 0.06),
-    0 8px 20px -4px rgba(11, 61, 145, 0.12),
-    0 24px 48px -12px rgba(11, 61, 145, 0.18);
+
+/* Áreas seguras del celular (notch y barra de gestos) */
+.barra-superior {
+  padding-top: env(safe-area-inset-top);
 }
-.sombra-boton {
+.barra-inferior {
+  padding-bottom: max(env(safe-area-inset-bottom), 0.75rem);
+}
+
+/* Sombra suave multicapa, en vez de la sombra dura de las apps del Estado */
+.elevacion {
   box-shadow:
-    0 1px 2px rgba(11, 61, 145, 0.2),
-    0 4px 12px -2px rgba(11, 61, 145, 0.35);
+    0 1px 2px rgba(20, 20, 20, 0.05),
+    0 4px 12px rgba(20, 20, 20, 0.06);
+}
+.elevacion-alta {
+  box-shadow:
+    0 2px 4px rgba(35, 45, 79, 0.08),
+    0 12px 28px rgba(35, 45, 79, 0.14);
+}
+
+/* Fila de lista estilo app: ícono + texto + chevron, separadas por 1px */
+.fila {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  width: 100%;
+  min-height: 3.75rem;
+  padding: 0.875rem 1rem;
+  text-align: left;
+  background: #fff;
+}
+.fila + .fila {
+  border-top: 1px solid var(--borde);
+}
+.fila:active {
+  background: #f6f8fb;
 }
 
 /* --- Animaciones --- */
@@ -119,7 +170,7 @@ summary {
 @keyframes aparecer {
   from {
     opacity: 0;
-    transform: translateY(12px) scale(0.995);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -127,21 +178,7 @@ summary {
   }
 }
 .aparecer {
-  animation: aparecer 380ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-@keyframes deslizar {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-.deslizar {
-  animation: deslizar 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: aparecer 340ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @keyframes latir {
@@ -150,7 +187,7 @@ summary {
     opacity: 1;
   }
   50% {
-    opacity: 0.45;
+    opacity: 0.4;
   }
 }
 .latir {
@@ -167,7 +204,7 @@ summary {
 }
 .crecer {
   transform-origin: left;
-  animation: crecer 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: crecer 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -175,7 +212,6 @@ summary {
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
 }

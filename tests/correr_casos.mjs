@@ -7,7 +7,8 @@ import { fileURLToPath } from "node:url";
 const BASE = path.dirname(fileURLToPath(import.meta.url));
 const URL = (process.argv[2] || "https://es-oficial.vercel.app").replace(/\/$/, "");
 const casos = JSON.parse(fs.readFileSync(path.join(BASE, "casos.json"), "utf-8"));
-const CONCURRENCIA = 4;
+const CONCURRENCIA = 3;
+const REINTENTOS = 2; // los 500 esporádicos de la API no son fallos de clasificación
 
 // tolerancia: para "ambiguo" aceptamos amarillo o rojo; para estafa aceptamos rojo (amarillo cuenta como acierto parcial)
 function evaluar(esperado, obtenido, categoria) {
@@ -19,13 +20,22 @@ function evaluar(esperado, obtenido, categoria) {
 }
 
 async function analizar(texto) {
-  const r = await fetch(`${URL}/api/analizar`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ texto }),
-  });
-  if (!r.ok) throw new Error(`${r.status} ${await r.text()}`);
-  return r.json();
+  let ultimo;
+  for (let i = 0; i <= REINTENTOS; i++) {
+    try {
+      const r = await fetch(`${URL}/api/analizar`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ texto }),
+      });
+      if (!r.ok) throw new Error(`${r.status} ${(await r.text()).slice(0, 120)}`);
+      return await r.json();
+    } catch (e) {
+      ultimo = e;
+      await new Promise((res) => setTimeout(res, 1200 * (i + 1)));
+    }
+  }
+  throw ultimo;
 }
 
 const resultados = [];

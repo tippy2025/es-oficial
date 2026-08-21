@@ -1,10 +1,23 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f5f7fb;
+  --background: #f4f6fb;
   --foreground: #0f172a;
+
   --brand: #0b3d91;
   --brand-600: #1d4ed8;
+  --brand-tint: #eef3fd;
+
+  /* Semánticos: misma temperatura que el navy de marca */
+  --danger: #b91c1c;
+  --danger-bg: #fef4f4;
+  --danger-line: #dc2626;
+  --warn: #92400e;
+  --warn-bg: #fffbeb;
+  --warn-line: #d97706;
+  --ok: #14602f;
+  --ok-bg: #f2fbf4;
+  --ok-line: #16a34a;
 }
 
 @theme inline {
@@ -13,9 +26,14 @@
   --color-brand: var(--brand);
   --color-brand-600: var(--brand-600);
   --font-sans: var(--font-atkinson);
+  --font-titulo: var(--font-titulo), Georgia, serif;
 }
 
-/* Solo modo claro, a propósito: público mayor, look de home banking. */
+.font-titulo {
+  font-family: var(--font-titulo), Georgia, serif;
+  letter-spacing: -0.015em;
+}
+
 html {
   color-scheme: light;
 }
@@ -25,27 +43,70 @@ body {
   color: var(--foreground);
   font-family: var(--font-atkinson), system-ui, -apple-system, "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-button,
-a {
-  transition:
-    background-color 150ms ease,
-    color 150ms ease,
-    border-color 150ms ease,
-    box-shadow 150ms ease,
-    transform 100ms ease;
+/* --- Detalles finos --- */
+* {
+  -webkit-tap-highlight-color: transparent;
 }
 
-button:active {
-  transform: translateY(1px);
+::selection {
+  background: var(--brand-600);
+  color: #fff;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #c7d2e3;
+  border-radius: 999px;
+  border: 2px solid var(--background);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a9b8ce;
 }
 
 :focus-visible {
-  outline: 3px solid #93c5fd;
+  outline: 3px solid var(--brand-600);
   outline-offset: 2px;
+  border-radius: 6px;
 }
 
+button,
+a,
+summary {
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 120ms ease,
+    opacity 160ms ease;
+}
+
+/* Sombra en capas: se ve mucho más real que una sola sombra difusa */
+.sombra-carta {
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 4px 12px -2px rgba(15, 23, 42, 0.06),
+    0 12px 32px -8px rgba(15, 23, 42, 0.08);
+}
+.sombra-alta {
+  box-shadow:
+    0 2px 4px rgba(11, 61, 145, 0.06),
+    0 8px 20px -4px rgba(11, 61, 145, 0.12),
+    0 24px 48px -12px rgba(11, 61, 145, 0.18);
+}
+.sombra-boton {
+  box-shadow:
+    0 1px 2px rgba(11, 61, 145, 0.2),
+    0 4px 12px -2px rgba(11, 61, 145, 0.35);
+}
+
+/* --- Animaciones --- */
 @keyframes spin {
   to {
     transform: rotate(360deg);
@@ -53,4 +114,68 @@ button:active {
 }
 .animate-spin {
   animation: spin 0.8s linear infinite;
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.995);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.aparecer {
+  animation: aparecer 380ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes deslizar {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.deslizar {
+  animation: deslizar 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes latir {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+.latir {
+  animation: latir 1.4s ease-in-out infinite;
+}
+
+@keyframes crecer {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.crecer {
+  transform-origin: left;
+  animation: crecer 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

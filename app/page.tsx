@@ -4,16 +4,15 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   AlertCircle,
   AlertTriangle,
-  ArrowRight,
   BadgeCheck,
   Camera,
   Check,
   CheckCircle2,
+  ChevronDown,
   Dices,
   Flag,
   Globe,
   Image as ImageIcon,
-  ListChecks,
   Loader2,
   Lock,
   Phone,
@@ -26,6 +25,7 @@ import {
   X,
 } from "lucide-react";
 import type { Veredicto } from "@/lib/reglas";
+import { Marca } from "./marca";
 
 const EJEMPLOS = [
   {
@@ -45,7 +45,7 @@ const EJEMPLOS = [
   },
 ];
 
-// Más casos para el botón "sorprendeme" (no ocupan lugar en la UI)
+// Más casos para el botón "probar con uno al azar"
 const EJEMPLOS_EXTRA = [
   "Buen día, lo llamo del área de seguridad de Banco Galicia. Detectamos una compra sospechosa de $95.000 con su tarjeta. Para cancelarla necesito que se acerque al cajero más cercano y siga mis indicaciones para generar un código de cancelación. Manténgase en línea, es urgente.",
   "¡FELICITACIONES! Su número fue seleccionado ganador de un Samsung Galaxy S25 en el sorteo aniversario de Mercado Libre. Para recibirlo solo debe abonar el costo de envío de $4.500 en el siguiente link: bit.ly/premio-ml-2026",
@@ -58,10 +58,43 @@ const EJEMPLOS_EXTRA = [
   "Hola Juan Manuel, te recordamos tu turno de Oftalmología el martes 26/08 a las 15:40 hs con la Dra. Pérez, Centro Médico Belgrano. Si necesitás cancelar, hacelo desde la app OSDE o llamando al 0810-555-6733.",
 ];
 
-const COLORES: Record<string, { borde: string; fondo: string; texto: string; punto: string }> = {
-  rojo: { borde: "border-red-600", fondo: "bg-red-50", texto: "text-red-900", punto: "bg-red-600" },
-  amarillo: { borde: "border-amber-500", fondo: "bg-amber-50", texto: "text-amber-900", punto: "bg-amber-500" },
-  verde: { borde: "border-green-600", fondo: "bg-green-50", texto: "text-green-900", punto: "bg-green-600" },
+const PASOS_CARGA = [
+  "Leyendo el mensaje…",
+  "Buscando señales de estafa conocidas…",
+  "Verificando el canal oficial del organismo…",
+  "Armando qué tenés que hacer…",
+];
+
+type Estilo = {
+  linea: string;
+  texto: string;
+  fondo: string;
+  etiqueta: string;
+  nivelBarra: number;
+};
+
+const COLORES: Record<string, Estilo> = {
+  rojo: {
+    linea: "var(--danger-line)",
+    texto: "var(--danger)",
+    fondo: "var(--danger-bg)",
+    etiqueta: "Riesgo alto",
+    nivelBarra: 3,
+  },
+  amarillo: {
+    linea: "var(--warn-line)",
+    texto: "var(--warn)",
+    fondo: "var(--warn-bg)",
+    etiqueta: "Riesgo medio",
+    nivelBarra: 2,
+  },
+  verde: {
+    linea: "var(--ok-line)",
+    texto: "var(--ok)",
+    fondo: "var(--ok-bg)",
+    etiqueta: "Riesgo bajo",
+    nivelBarra: 1,
+  },
 };
 
 const TITULOS: Record<string, string> = {
@@ -78,8 +111,21 @@ export default function Home() {
   const [veredicto, setVeredicto] = useState<Veredicto | null>(null);
   const [copiado, setCopiado] = useState(false);
   const [reportado, setReportado] = useState(false);
+  const [pasoCarga, setPasoCarga] = useState(PASOS_CARGA[0]);
   const fileRef = useRef<HTMLInputElement>(null);
   const resultadoRef = useRef<HTMLDivElement>(null);
+
+  // Mensajes rotativos mientras analiza: la espera se siente trabajo, no cuelgue.
+  useEffect(() => {
+    if (!cargando) return;
+    let i = 0;
+    setPasoCarga(PASOS_CARGA[0]);
+    const id = setInterval(() => {
+      i = Math.min(i + 1, PASOS_CARGA.length - 1);
+      setPasoCarga(PASOS_CARGA[i]);
+    }, 1400);
+    return () => clearInterval(id);
+  }, [cargando]);
 
   const cargarImagen = useCallback((file: File) => {
     if (!file.type.startsWith("image/")) return;
@@ -132,7 +178,7 @@ export default function Home() {
         setVeredicto(data);
         setTimeout(
           () => resultadoRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
-          100
+          120
         );
       } catch (e) {
         setError(e instanceof Error ? e.message : "No pudimos analizar el mensaje.");
@@ -209,38 +255,44 @@ export default function Home() {
       ...veredicto.queHacer.map((s) => `• ${s}`),
       "",
       "Analizado con ¿Es Oficial? — antes de responder, preguntá.",
+      "es-oficial.vercel.app",
     ].join("\n");
     navigator.clipboard.writeText(resumen).then(() => {
       setCopiado(true);
       setTimeout(() => setCopiado(false), 2500);
     });
   }
-
   const c = veredicto ? COLORES[veredicto.nivel] : null;
+  const hayResultado = Boolean(veredicto && c);
 
   return (
-    <main className="min-h-screen bg-[#f5f7fb] text-slate-900">
-      <div className="mx-auto max-w-2xl px-4 py-8 sm:py-14">
-        <header className="flex flex-col items-center text-center">
-          <div
-            className="flex h-20 w-20 items-center justify-center rounded-2xl bg-[#0b3d91] shadow-lg shadow-blue-900/20"
-            aria-hidden
-          >
-            <ShieldCheck className="h-11 w-11 text-white" strokeWidth={2.2} />
-          </div>
-          <h1 className="mt-4 text-4xl font-bold tracking-tight text-[#0b3d91] sm:text-5xl">
-            ¿Es Oficial?
+    <main className="min-h-screen">
+      {/* Barra superior con la marca */}
+      <div className="border-b border-slate-200/70 bg-white/80 backdrop-blur">
+        <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
+          <Marca />
+          <span className="hidden text-xs font-medium text-slate-500 sm:block">
+            Gratis · sin registro · no guardamos nada
+          </span>
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-2xl px-4 pb-16 pt-8 sm:pt-12">
+        <header className="text-center">
+          <h1 className="font-titulo text-balance text-[1.6rem] font-bold leading-[1.2] text-slate-900 sm:text-[2.3rem]">
+            ¿Te llegó un mensaje raro?{" "}
+            <span className="text-[var(--brand)]">Antes de responder, preguntá.</span>
           </h1>
-          <p className="mt-3 text-xl text-slate-700">
-            ¿Te llegó un mensaje raro? Antes de responder, preguntá.
-          </p>
-          <p className="mx-auto mt-2 max-w-md text-base text-slate-600">
-            Pegá el mensaje o subí una captura y te decimos en segundos si tiene
-            señales de estafa y qué hacer.
-          </p>
+          {!hayResultado && !cargando && (
+            <p className="mx-auto mt-3 max-w-md text-pretty leading-snug text-slate-600 sm:text-lg">
+              Pegá el mensaje o subí la captura. En segundos te decimos si tiene señales de
+              estafa, qué hacer, y el teléfono real del organismo para verificar.
+            </p>
+          )}
         </header>
 
-        <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+        {/* Formulario */}
+        <section className="sombra-carta mt-7 rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-5">
           <label htmlFor="mensaje" className="sr-only">
             Mensaje sospechoso
           </label>
@@ -253,34 +305,49 @@ export default function Home() {
             }}
             onPaste={onPaste}
             rows={5}
-            placeholder={
-              "Pegá acá el mensaje sospechoso (WhatsApp, SMS o mail)...\nTambién podés pegar una captura con Ctrl+V."
-            }
-            className="w-full resize-y rounded-xl border border-slate-300 bg-white p-4 text-lg text-slate-900 placeholder:text-slate-500 focus:border-[#1d4ed8] focus:ring-2 focus:ring-blue-200"
+            placeholder={"Pegá acá el mensaje sospechoso…\n(WhatsApp, SMS o mail)"}
+            className="w-full resize-y rounded-2xl border border-slate-200 bg-slate-50/60 p-4 text-lg leading-relaxed text-slate-900 placeholder:text-slate-500 focus:border-[var(--brand-600)] focus:bg-white focus:outline-none focus:ring-4 focus:ring-[var(--brand-600)]/10"
           />
 
           {imagen && (
-            <div className="mt-3 flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-2">
+            <div className="deslizar mt-3 flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-2.5">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={imagen.preview} alt="Captura subida" className="h-20 rounded-lg object-cover" />
-              <span className="flex items-center gap-2 text-sm text-slate-700">
-                <ImageIcon className="h-4 w-4" aria-hidden /> Captura lista para analizar
+              <img src={imagen.preview} alt="Captura subida" className="h-16 w-16 rounded-xl object-cover" />
+              <span className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                <ImageIcon className="h-4 w-4 text-slate-500" aria-hidden /> Captura lista
               </span>
               <button
                 onClick={() => setImagen(null)}
-                className="ml-auto flex items-center gap-1 rounded-lg px-3 py-1 text-sm text-red-700 hover:bg-red-50"
+                className="ml-auto rounded-lg p-2 text-slate-500 hover:bg-white hover:text-red-700"
+                aria-label="Quitar captura"
               >
-                <X className="h-4 w-4" aria-hidden /> Quitar
+                <X className="h-4 w-4" aria-hidden />
               </button>
             </div>
           )}
 
-          <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+          <button
+            onClick={() => analizar()}
+            disabled={cargando}
+            className="sombra-boton mt-4 flex w-full items-center justify-center gap-2.5 rounded-2xl bg-[var(--brand)] px-5 py-4 text-lg font-bold text-white hover:bg-[var(--brand-600)] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-75"
+          >
+            {cargando ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin" aria-hidden /> Analizando…
+              </>
+            ) : (
+              <>
+                <Search className="h-5 w-5" aria-hidden /> Analizar mensaje
+              </>
+            )}
+          </button>
+
+          <div className="mt-3.5 flex flex-wrap items-center gap-x-5 gap-y-2">
             <button
               onClick={() => fileRef.current?.click()}
-              className="flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-lg font-medium text-slate-800 hover:border-slate-400 hover:bg-slate-50"
+              className="flex items-center gap-1.5 text-sm font-medium text-slate-600 underline-offset-4 hover:text-[var(--brand)] hover:underline"
             >
-              <Camera className="h-5 w-5" aria-hidden /> Subir captura
+              <Camera className="h-4 w-4" aria-hidden /> Subir una captura
             </button>
             <input
               ref={fileRef}
@@ -290,25 +357,31 @@ export default function Home() {
               onChange={(e) => e.target.files?.[0] && cargarImagen(e.target.files[0])}
             />
             <button
-              onClick={() => analizar()}
-              disabled={cargando}
-              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#0b3d91] px-5 py-3 text-lg font-bold text-white shadow-md shadow-blue-900/20 hover:bg-[#1d4ed8] disabled:cursor-not-allowed disabled:opacity-70"
+              onClick={() => {
+                const t = EJEMPLOS_EXTRA[Math.floor(Math.random() * EJEMPLOS_EXTRA.length)];
+                setTexto(t);
+                setImagen(null);
+                setVeredicto(null);
+              }}
+              className="flex items-center gap-1.5 text-sm font-medium text-slate-600 underline-offset-4 hover:text-[var(--brand)] hover:underline"
+              title="Cargar un mensaje de prueba al azar"
             >
-              {cargando ? (
-                <>
-                  <Loader2 className="h-5 w-5 animate-spin" aria-hidden /> Analizando…
-                </>
-              ) : (
-                <>
-                  <Search className="h-5 w-5" aria-hidden /> Analizar mensaje
-                </>
-              )}
+              <Dices className="h-4 w-4" aria-hidden /> Probar con uno al azar
             </button>
           </div>
 
+          {error && (
+            <p className="deslizar mt-4 flex items-start gap-2 rounded-2xl bg-red-50 p-3.5 text-red-800">
+              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden /> {error}
+            </p>
+          )}
+        </section>
+
+        {/* Ejemplos: ruedas de entrenamiento, prioridad baja */}
+        {!hayResultado && !cargando && (
           <div className="mt-5">
-            <p className="text-xs font-bold uppercase tracking-wide text-slate-600">
-              Probá con un ejemplo
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+              O probá con un ejemplo
             </p>
             <div className="mt-2 flex flex-wrap gap-2">
               {EJEMPLOS.map((ej) => (
@@ -319,195 +392,288 @@ export default function Home() {
                     setImagen(null);
                     setVeredicto(null);
                   }}
-                  className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 hover:border-[#1d4ed8] hover:text-[#1d4ed8]"
+                  className="rounded-lg bg-slate-200/70 px-2.5 py-1.5 text-sm text-slate-700 hover:bg-slate-300/70"
                 >
                   {ej.etiqueta}
                 </button>
               ))}
-              <button
-                onClick={() => {
-                  const t = EJEMPLOS_EXTRA[Math.floor(Math.random() * EJEMPLOS_EXTRA.length)];
-                  setTexto(t);
-                  setImagen(null);
-                  setVeredicto(null);
-                }}
-                className="flex items-center gap-1.5 rounded-full border border-dashed border-[#1d4ed8] px-3 py-1.5 text-sm text-[#1d4ed8] hover:bg-blue-50"
-                title="Cargar un mensaje de prueba al azar (¿estafa o real? descubrilo)"
-              >
-                <Dices className="h-4 w-4" aria-hidden /> Sorprendeme
-              </button>
             </div>
           </div>
+        )}
 
-          {error && (
-            <p className="mt-4 flex items-start gap-2 rounded-xl bg-red-50 p-3 text-red-800">
-              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden /> {error}
-            </p>
-          )}
-        </section>
+        {/* Esqueleto mientras analiza */}
+        {cargando && (
+          <section className="sombra-carta deslizar mt-6 overflow-hidden rounded-3xl border border-slate-200/80 bg-white">
+            <div className="latir h-1.5 w-full bg-slate-300" />
+            <div className="p-5 sm:p-7">
+              <div className="flex items-center gap-4">
+                <div className="latir h-14 w-14 shrink-0 rounded-full bg-slate-200" />
+                <div className="flex-1 space-y-2">
+                  <div className="latir h-3 w-28 rounded-full bg-slate-200" />
+                  <div className="latir h-6 w-52 rounded-full bg-slate-200" />
+                </div>
+              </div>
+              <div className="mt-6 space-y-2.5">
+                <div className="latir h-4 w-full rounded-full bg-slate-200" />
+                <div className="latir h-4 w-11/12 rounded-full bg-slate-200" />
+                <div className="latir h-4 w-3/5 rounded-full bg-slate-200" />
+              </div>
+              <p className="mt-6 text-center text-sm text-slate-500">{pasoCarga}</p>
+            </div>
+          </section>
+        )}
 
+        {/* Resultado */}
         {veredicto && c && (
           <section
             ref={resultadoRef}
-            className={`mt-6 rounded-2xl border-2 ${c.borde} ${c.fondo} p-5 shadow-sm sm:p-6`}
+            className="sombra-alta aparecer mt-6 overflow-hidden rounded-3xl border border-slate-200/80 bg-white"
             aria-live="polite"
           >
-            <div className="flex items-center gap-3">
-              <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${c.punto} text-white`}>
-                {veredicto.nivel === "rojo" ? (
-                  <ShieldAlert className="h-6 w-6" aria-hidden />
-                ) : veredicto.nivel === "amarillo" ? (
-                  <AlertTriangle className="h-6 w-6" aria-hidden />
-                ) : (
-                  <ShieldCheck className="h-6 w-6" aria-hidden />
-                )}
-              </span>
-              <h2 className={`text-2xl font-bold leading-tight ${c.texto}`}>{TITULOS[veredicto.nivel]}</h2>
-            </div>
-            <p className="mt-4 text-lg leading-relaxed text-slate-800">
-              {veredicto.explicacionSimple}
-            </p>
+            <div className="crecer h-1.5 w-full" style={{ background: c.linea }} />
 
-            {veredicto.senales.length > 0 && (
-              <div className="mt-5">
-                <h3 className="flex items-center gap-2 font-bold text-slate-900">
-                  <Search className="h-4 w-4 text-slate-600" aria-hidden /> Señales detectadas
-                </h3>
-                <ul className="mt-2 space-y-2">
-                  {veredicto.senales.map((s, i) => (
-                    <li key={i} className="flex gap-2 text-slate-800">
-                      <span className={`mt-2 h-2 w-2 shrink-0 rounded-full ${c.punto}`} aria-hidden />
-                      <span>{s}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {veredicto.queHacer.length > 0 && (
-              <div className="mt-5">
-                <h3 className="flex items-center gap-2 font-bold text-slate-900">
-                  <ListChecks className="h-4 w-4 text-slate-600" aria-hidden /> Qué hacer ahora
-                </h3>
-                <ul className="mt-2 space-y-2">
-                  {veredicto.queHacer.map((s, i) => (
-                    <li key={i} className="flex gap-2 text-slate-800">
-                      <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-slate-600" aria-hidden />
-                      <span className="font-medium">{s}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {veredicto.canalOficial && (
-              <div className="mt-5 rounded-xl border-2 border-[#0b3d91] bg-white p-4">
-                <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-[#0b3d91]">
-                  <BadgeCheck className="h-4 w-4" aria-hidden /> Canal oficial verificado · {veredicto.canalOficial.nombre}
-                </p>
-                <p className="mt-1 text-slate-800">
-                  {veredicto.canalOficial.nuncaHace}
-                </p>
-                <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-                  {veredicto.canalOficial.telefono && (
-                    <a
-                      href={`tel:${veredicto.canalOficial.telefono.replace(/[^\d+]/g, "")}`}
-                      className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#0b3d91] px-4 py-3 text-center text-lg font-bold text-white hover:bg-[#1d4ed8]"
-                    >
-                      <Phone className="h-5 w-5" aria-hidden /> Llamar al {veredicto.canalOficial.telefono}
-                    </a>
-                  )}
-                  {veredicto.canalOficial.web && (
-                    <a
-                      href={`https://${veredicto.canalOficial.web}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex flex-1 items-center justify-center gap-2 rounded-xl border-2 border-[#0b3d91] px-4 py-3 text-center text-lg font-bold text-[#0b3d91] hover:bg-blue-50"
-                    >
-                      <Globe className="h-5 w-5" aria-hidden /> {veredicto.canalOficial.web}
-                    </a>
-                  )}
-                </div>
-                <p className="mt-2 text-sm text-slate-600">
-                  Estos son los datos reales del organismo, no los del mensaje. Llamá o entrá vos: nunca desde el link que te mandaron.
-                </p>
-              </div>
-            )}
-
-            {veredicto.verificacionOficial && (
-              <div className="mt-4 rounded-xl bg-white/80 p-4">
-                <h3 className="flex items-center gap-2 font-bold text-slate-900">
-                  <CheckCircle2 className="h-4 w-4 text-slate-600" aria-hidden /> Cómo confirmarlo
-                </h3>
-                <p className="mt-1 text-slate-800">{veredicto.verificacionOficial}</p>
-              </div>
-            )}
-
-            {veredicto.nivel !== "verde" && (
-              <div className="mt-4 rounded-xl bg-white/80 p-4">
-                <h3 className="flex items-center gap-2 font-bold text-slate-900">
-                  <Siren className="h-4 w-4 text-slate-600" aria-hidden /> Dónde denunciar
-                </h3>
-                <p className="mt-1 text-slate-800">
-                  Si transferiste dinero o diste datos, llamá <strong>ya</strong> a tu banco por el número del dorso de tu tarjeta.
-                  Denunciá el intento en la Unidad Fiscal de Ciberdelincuencia (UFECI):{" "}
-                  <a className="font-medium text-[#0b3d91] underline" href="mailto:denunciasufeci@mpf.gov.ar">denunciasufeci@mpf.gov.ar</a>{" "}
-                  o en la comisaría más cercana. Línea gratuita de orientación: <strong>134</strong>.
-                </p>
-              </div>
-            )}
-
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-              <button
-                onClick={compartir}
-                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#0b3d91] px-5 py-3 text-lg font-bold text-white shadow-md shadow-blue-900/20 hover:bg-[#1d4ed8]"
-              >
-                {copiado ? (
-                  <>
-                    <Check className="h-5 w-5" aria-hidden /> ¡Copiado! Pegalo en WhatsApp
-                  </>
-                ) : (
-                  <>
-                    <Share2 className="h-5 w-5" aria-hidden /> Copiar para compartir con mamá
-                  </>
-                )}
-              </button>
-              {veredicto.nivel !== "verde" && (
-                <button
-                  onClick={reportar}
-                  disabled={reportado}
-                  className="flex items-center justify-center gap-2 rounded-xl border-2 border-slate-400 bg-white px-5 py-3 text-lg font-medium text-slate-800 hover:border-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-70"
+            <div className="p-5 sm:p-7">
+              <div className="flex items-start gap-4">
+                <span
+                  className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-white"
+                  style={{ background: c.linea }}
                 >
-                  {reportado ? (
+                  {veredicto.nivel === "rojo" ? (
+                    <ShieldAlert className="h-7 w-7" aria-hidden />
+                  ) : veredicto.nivel === "amarillo" ? (
+                    <AlertTriangle className="h-7 w-7" aria-hidden />
+                  ) : (
+                    <ShieldCheck className="h-7 w-7" aria-hidden />
+                  )}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                    Resultado del análisis
+                  </p>
+                  <h2
+                    className="font-titulo text-balance text-2xl font-bold leading-tight sm:text-3xl"
+                    style={{ color: c.texto }}
+                  >
+                    {TITULOS[veredicto.nivel]}
+                  </h2>
+                  <div className="mt-3 flex items-center gap-2">
+                    <div className="flex flex-1 gap-1" aria-hidden>
+                      {[0, 1, 2].map((i) => (
+                        <span
+                          key={i}
+                          className="h-1.5 flex-1 rounded-full"
+                          style={{ background: i < c.nivelBarra ? c.linea : "#e2e8f0" }}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-xs font-bold" style={{ color: c.texto }}>
+                      {c.etiqueta}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <p className="mt-5 text-pretty text-lg leading-relaxed text-slate-800">
+                {veredicto.explicacionSimple}
+              </p>
+
+              {/* Qué hacer: visible siempre, es la acción */}
+              {veredicto.queHacer.length > 0 && (
+                <div className="mt-6 rounded-2xl p-4 sm:p-5" style={{ background: c.fondo }}>
+                  <h3 className="text-[11px] font-bold uppercase tracking-wider" style={{ color: c.texto }}>
+                    Qué hacer ahora
+                  </h3>
+                  <ol className="mt-3 space-y-3">
+                    {veredicto.queHacer.map((s, i) => (
+                      <li key={i} className="flex gap-3 text-slate-800">
+                        <span
+                          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+                          style={{ background: c.linea }}
+                        >
+                          {i + 1}
+                        </span>
+                        <span className="font-medium leading-snug">{s}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+
+              {/* Canal oficial: el diferencial del producto */}
+              {veredicto.canalOficial && (
+                <div className="mt-4 overflow-hidden rounded-2xl bg-[var(--brand)] text-white">
+                  <div className="p-4 sm:p-5">
+                    <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-blue-200">
+                      <BadgeCheck className="h-4 w-4" aria-hidden /> Canal oficial verificado ·{" "}
+                      {veredicto.canalOficial.nombre}
+                    </p>
+                    <p className="mt-2 text-pretty leading-snug text-blue-50">
+                      {veredicto.canalOficial.nuncaHace}
+                    </p>
+                    <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+                      {veredicto.canalOficial.telefono && (
+                        <a
+                          href={`tel:${veredicto.canalOficial.telefono.replace(/[^\d+]/g, "")}`}
+                          className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-white px-4 py-3.5 text-lg font-bold text-[var(--brand)] hover:bg-blue-50 active:scale-[0.99]"
+                        >
+                          <Phone className="h-5 w-5" aria-hidden /> Llamar al {veredicto.canalOficial.telefono}
+                        </a>
+                      )}
+                      {veredicto.canalOficial.web && (
+                        <a
+                          href={`https://${veredicto.canalOficial.web}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/40 px-4 py-3.5 font-bold text-white hover:bg-white/10 active:scale-[0.99]"
+                        >
+                          <Globe className="h-5 w-5" aria-hidden /> {veredicto.canalOficial.web}
+                        </a>
+                      )}
+                    </div>
+                    <p className="mt-3 text-sm leading-snug text-blue-200">
+                      Estos son los datos reales del organismo, no los del mensaje. Llamá o entrá
+                      vos: nunca desde el link que te mandaron.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Detalle plegado */}
+              <div className="mt-5 divide-y divide-slate-200 border-y border-slate-200">
+                {veredicto.senales.length > 0 && (
+                  <Plegable
+                    icono={<Search className="h-4 w-4" aria-hidden />}
+                    titulo="Por qué lo detectamos"
+                    contador={`${veredicto.senales.length} ${veredicto.senales.length === 1 ? "señal" : "señales"}`}
+                  >
+                    <ul className="space-y-2">
+                      {veredicto.senales.map((s, i) => (
+                        <li
+                          key={i}
+                          className="rounded-r-lg border-l-[3px] bg-slate-50 py-2.5 pl-3.5 pr-3 leading-snug text-slate-700"
+                          style={{ borderColor: c.linea }}
+                        >
+                          {s}
+                        </li>
+                      ))}
+                    </ul>
+                  </Plegable>
+                )}
+
+                {veredicto.verificacionOficial && (
+                  <Plegable
+                    icono={<CheckCircle2 className="h-4 w-4" aria-hidden />}
+                    titulo="Cómo confirmarlo por las tuyas"
+                  >
+                    <p className="leading-relaxed text-slate-700">{veredicto.verificacionOficial}</p>
+                  </Plegable>
+                )}
+
+                {veredicto.nivel !== "verde" && (
+                  <Plegable
+                    icono={<Siren className="h-4 w-4" aria-hidden />}
+                    titulo="Si ya diste datos o transferiste"
+                  >
+                    <p className="leading-relaxed text-slate-700">
+                      Llamá <strong>ya</strong> a tu banco por el número del dorso de tu tarjeta.
+                      Denunciá el intento en la Unidad Fiscal de Ciberdelincuencia (UFECI):{" "}
+                      <a
+                        className="font-medium text-[var(--brand)] underline underline-offset-2"
+                        href="mailto:denunciasufeci@mpf.gov.ar"
+                      >
+                        denunciasufeci@mpf.gov.ar
+                      </a>{" "}
+                      o en la comisaría más cercana. Línea gratuita de orientación:{" "}
+                      <strong>134</strong>.
+                    </p>
+                  </Plegable>
+                )}
+              </div>
+
+              <div className="mt-5 flex flex-col gap-3">
+                <button
+                  onClick={compartir}
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-[var(--brand)] px-5 py-3.5 text-lg font-bold text-[var(--brand)] hover:bg-[var(--brand-tint)] active:scale-[0.99]"
+                >
+                  {copiado ? (
                     <>
-                      <Check className="h-5 w-5" aria-hidden /> Gracias, sumado a la base
+                      <Check className="h-5 w-5" aria-hidden /> ¡Copiado! Pegalo en WhatsApp
                     </>
                   ) : (
                     <>
-                      <Flag className="h-5 w-5" aria-hidden /> Reportar estafa real
+                      <Share2 className="h-5 w-5" aria-hidden /> Copiar para compartir con mamá
                     </>
                   )}
                 </button>
-              )}
+                {veredicto.nivel !== "verde" && (
+                  <button
+                    onClick={reportar}
+                    disabled={reportado}
+                    className="mx-auto flex items-center gap-1.5 text-sm font-medium text-slate-600 underline-offset-4 hover:text-[var(--brand)] hover:underline disabled:no-underline disabled:opacity-70"
+                  >
+                    {reportado ? (
+                      <>
+                        <Check className="h-4 w-4" aria-hidden /> Gracias, lo sumamos a la base
+                      </>
+                    ) : (
+                      <>
+                        <Flag className="h-4 w-4" aria-hidden /> Esto me pasó de verdad: reportarlo
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
             </div>
           </section>
         )}
 
         <GuiaInstalacion />
 
-        <footer className="mt-10 text-center text-sm leading-relaxed text-slate-600">
-          <p>
-            ¿Es Oficial? evalúa señales de riesgo con inteligencia artificial y
-            puede equivocarse. No reemplaza la verificación con el organismo o
-            banco por sus canales oficiales. No envíes datos personales sensibles.
+        <footer className="mt-10 space-y-2 text-center text-sm leading-relaxed text-slate-500">
+          <p className="mx-auto max-w-lg text-pretty">
+            ¿Es Oficial? evalúa señales de riesgo con inteligencia artificial y puede
+            equivocarse. No reemplaza la verificación con el organismo o el banco por sus
+            canales oficiales.
           </p>
-          <p className="mt-2">
+          <p>
             <Lock className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden />
-            Las imágenes y textos se analizan al momento y no se guardan.
+            No guardamos los mensajes ni las imágenes. No pedimos datos personales.
           </p>
         </footer>
       </div>
     </main>
+  );
+}
+
+/** Sección plegable del detalle del resultado. */
+function Plegable({
+  icono,
+  titulo,
+  contador,
+  children,
+}: {
+  icono: React.ReactNode;
+  titulo: string;
+  contador?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <details className="group">
+      <summary className="flex cursor-pointer list-none items-center gap-2.5 py-3.5 text-slate-800 marker:hidden hover:text-[var(--brand)]">
+        <span className="text-slate-500">{icono}</span>
+        <span className="font-bold">{titulo}</span>
+        {contador && (
+          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-600">
+            {contador}
+          </span>
+        )}
+        <ChevronDown
+          className="ml-auto h-5 w-5 shrink-0 text-slate-400 transition-transform group-open:rotate-180"
+          aria-hidden
+        />
+      </summary>
+      <div className="deslizar pb-4 pl-7 pr-1">{children}</div>
+    </details>
   );
 }
 
@@ -549,19 +715,22 @@ function GuiaInstalacion() {
           ];
 
   return (
-    <section className="mt-8 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-left">
+    <section className="mt-8 text-center">
       <button
         onClick={() => setAbierta((v) => !v)}
-        className="flex w-full items-center justify-between text-left"
+        className="mx-auto flex items-center gap-1.5 text-sm font-medium text-slate-600 underline-offset-4 hover:text-[var(--brand)] hover:underline"
         aria-expanded={abierta}
       >
-        <span className="flex items-center gap-2 text-base font-bold text-[#0b3d91]">
-          <Smartphone className="h-5 w-5" aria-hidden /> Tenela en tu celular {so === "ios" ? "(iPhone)" : so === "android" ? "(Android)" : ""}
-        </span>
-        <span className="text-[#0b3d91]">{abierta ? "▲" : "▼"}</span>
+        <Smartphone className="h-4 w-4" aria-hidden />
+        Tenerla a mano en el celular{" "}
+        {so === "ios" ? "(iPhone)" : so === "android" ? "(Android)" : ""}
+        <ChevronDown
+          className={`h-4 w-4 transition-transform ${abierta ? "rotate-180" : ""}`}
+          aria-hidden
+        />
       </button>
       {abierta && (
-        <ol className="mt-3 list-decimal space-y-2 pl-5 text-base text-slate-800">
+        <ol className="deslizar mx-auto mt-3 max-w-md list-decimal space-y-2 rounded-2xl border border-slate-200 bg-white p-4 pl-9 text-left text-[15px] leading-snug text-slate-700">
           {pasos.map((p, i) => (
             <li key={i}>{p}</li>
           ))}

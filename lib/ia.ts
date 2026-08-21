@@ -32,6 +32,8 @@ interface EntradaAnalisis {
   texto?: string;
   imagenBase64?: string;
   mimeType?: string;
+  /** el texto viene de la transcripción de una nota de voz o llamada */
+  esAudio?: boolean;
 }
 
 // Sanea claves cargadas con BOM/espacios (p. ej. al pegarlas por consola en Windows)
@@ -88,6 +90,12 @@ export { DIRECTORIO };
 
 const PEDIDO_TEXTO = (texto: string) =>
   `Analizá este mensaje que recibió el usuario:\n\n"""\n${texto}\n"""`;
+const PEDIDO_AUDIO = (texto: string) =>
+  `Esto es la TRANSCRIPCIÓN de una nota de voz o llamada que recibió el usuario:\n\n"""\n${texto}\n"""\n\n` +
+  `Analizala aplicando las reglas de notas de voz. Recordá: que la voz suene igual a la de un conocido no prueba nada, ` +
+  `hoy se clona con menos de 30 segundos de audio. Si pide plata, datos o urgencia, es rojo aunque la reconozcan. ` +
+  `En "queHacer" incluí siempre verificar llamando al número que el usuario ya tenía agendado de esa persona, ` +
+  `o preguntándole algo que solo ella pueda saber. Si el audio es un mensaje común sin pedidos, es verde.`;
 const PEDIDO_IMAGEN =
   "Analizá el mensaje que se ve en esta captura de pantalla que recibió el usuario. Primero leé todo el texto visible y después evaluá el riesgo.";
 
@@ -104,7 +112,12 @@ async function llamarAnthropic(entrada: EntradaAnalisis): Promise<string> {
     });
     content.push({ type: "text", text: PEDIDO_IMAGEN });
   } else {
-    content.push({ type: "text", text: PEDIDO_TEXTO(entrada.texto || "") });
+    content.push({
+      type: "text",
+      text: entrada.esAudio
+        ? PEDIDO_AUDIO(entrada.texto || "")
+        : PEDIDO_TEXTO(entrada.texto || ""),
+    });
   }
 
   const res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -137,10 +150,14 @@ async function llamarGemini(entrada: EntradaAnalisis): Promise<string> {
     });
     parts.push({ text: PEDIDO_IMAGEN });
   } else {
-    parts.push({ text: PEDIDO_TEXTO(entrada.texto || "") });
+    parts.push({
+      text: entrada.esAudio
+        ? PEDIDO_AUDIO(entrada.texto || "")
+        : PEDIDO_TEXTO(entrada.texto || ""),
+    });
   }
 
-  const model = process.env.GEMINI_MODEL || "gemini-2.0-flash";
+  const model = process.env.GEMINI_MODEL || "gemini-flash-latest";
   const res = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey()}`,
     {

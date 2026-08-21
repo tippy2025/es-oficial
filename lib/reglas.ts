@@ -39,6 +39,13 @@ LINKS Y SITIOS (si el mensaje trae una URL, analizala)
 - HTTP sin S, o un link que no coincide con el texto visible, son señales fuertes.
 - Un mail oficial de Mercado Libre/Pago termina en @mercadolibre.com / @mercadopago.com; los bancos usan su dominio propio, nunca gmail/hotmail/outlook.
 
+NOTAS DE VOZ Y LLAMADAS (voz clonada con IA)
+- Que la voz suene idéntica a la de un familiar NO prueba nada: en 2026 alcanzan 20-30 segundos de audio sacado de una historia de Instagram o un estado de WhatsApp para clonar una voz con IA. En Argentina hubo casos resonantes (le clonaron la voz a periodistas conocidos y a funcionarios; el Banco Central alertó por videos manipulados de sus propios voceros).
+- Si el audio pide plata, una transferencia, datos, códigos, o dice que es una emergencia y hay que actuar ya, tratalo como ROJO aunque la voz sea reconocible. La técnica es justamente que la reconozcas.
+- Señales típicas en audios de estafa: audio corto y con ruido de fondo o cortado (para disimular artefactos de la clonación), tono de urgencia extrema, pedido de secreto ("no le digas a nadie", "no cortes"), el que habla evita responder preguntas concretas, insiste en cambiar de canal o de número, o pide que no lo llames de vuelta.
+- Regla de oro que hay que decirle SIEMPRE al usuario ante un audio con pedido de dinero: cortá y llamá vos al número de siempre de esa persona (el que ya tenés agendado), o preguntale algo que solo ella pueda saber. Nunca verifiques por la misma vía por la que te llegó el audio.
+- Un audio legítimo (un recordatorio, un mensaje familiar común, una nota de voz de trabajo sin pedidos de dinero ni datos) es verde: no marques todo audio como estafa.
+
 CÓMO VERIFICAR EN SERIO
 - Cortá y llamá vos al número oficial que figura en la web del organismo/banco (no al que te llamó ni al que figura en el mensaje).
 - Entrá escribiendo vos la dirección oficial en el navegador, nunca desde el link recibido.
@@ -75,4 +82,6 @@ export interface Veredicto {
   organismoSuplantado?: string | null;
   /** datos verificados del canal oficial, resueltos en el servidor */
   canalOficial?: CanalOficial | null;
+  /** si la entrada fue un audio, lo que se escuchó */
+  transcripcion?: string | null;
 }

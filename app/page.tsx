@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   AlertCircle,
   AlertTriangle,
+  AudioLines,
   BadgeCheck,
   Camera,
   Check,
@@ -15,6 +16,7 @@ import {
   Image as ImageIcon,
   Loader2,
   Lock,
+  Mic,
   Phone,
   Search,
   Share2,
@@ -112,7 +114,12 @@ export default function Home() {
   const [copiado, setCopiado] = useState(false);
   const [reportado, setReportado] = useState(false);
   const [pasoCarga, setPasoCarga] = useState(PASOS_CARGA[0]);
+  const [audio, setAudio] = useState<{ base64: string; mime: string; url: string } | null>(null);
+  const [grabando, setGrabando] = useState(false);
+  const [segundos, setSegundos] = useState(0);
   const fileRef = useRef<HTMLInputElement>(null);
+  const audioRef = useRef<HTMLInputElement>(null);
+  const recorderRef = useRef<MediaRecorder | null>(null);
   const resultadoRef = useRef<HTMLDivElement>(null);
 
   // Mensajes rotativos mientras analiza: la espera se siente trabajo, no cuelgue.
@@ -138,6 +145,58 @@ export default function Home() {
     reader.readAsDataURL(file);
   }, []);
 
+  const cargarAudio = useCallback((file: File) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      setAudio({
+        base64: dataUrl.split(",")[1],
+        mime: file.type || "audio/webm",
+        url: URL.createObjectURL(file),
+      });
+      setImagen(null);
+      setTexto("");
+      setVeredicto(null);
+      setError(null);
+    };
+    reader.readAsDataURL(file);
+  }, []);
+
+  // Contador de la grabación
+  useEffect(() => {
+    if (!grabando) return;
+    setSegundos(0);
+    const id = setInterval(() => setSegundos((s) => s + 1), 1000);
+    return () => clearInterval(id);
+  }, [grabando]);
+
+  const alternarGrabacion = useCallback(async () => {
+    if (grabando) {
+      recorderRef.current?.stop();
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const rec = new MediaRecorder(stream);
+      const trozos: BlobPart[] = [];
+      rec.ondataavailable = (e) => e.data.size > 0 && trozos.push(e.data);
+      rec.onstop = () => {
+        stream.getTracks().forEach((t) => t.stop());
+        setGrabando(false);
+        const blob = new Blob(trozos, { type: rec.mimeType || "audio/webm" });
+        cargarAudio(new File([blob], "grabacion.webm", { type: blob.type }));
+      };
+      recorderRef.current = rec;
+      rec.start();
+      setGrabando(true);
+      setError(null);
+      // corte de seguridad a los 3 minutos
+      setTimeout(() => rec.state === "recording" && rec.stop(), 180000);
+    } catch {
+      setError("No pudimos usar el micrófono. Podés subir el archivo de audio con el botón de al lado.");
+    }
+  }, [grabando, cargarAudio]);
+
   const onPaste = useCallback(
     (e: React.ClipboardEvent) => {
       const item = Array.from(e.clipboardData.items).find((i) => i.type.startsWith("image/"));
@@ -153,10 +212,11 @@ export default function Home() {
   const analizar = useCallback(
     async (
       textoIn: string = texto,
-      imagenIn: { base64: string; mime: string; preview: string } | null = imagen
+      imagenIn: { base64: string; mime: string; preview: string } | null = imagen,
+      audioIn: { base64: string; mime: string; url: string } | null = audio
     ) => {
-      if (!textoIn.trim() && !imagenIn) {
-        setError("Pegá el mensaje sospechoso o subí una captura de pantalla.");
+      if (!textoIn.trim() && !imagenIn && !audioIn) {
+        setError("Pegá el mensaje sospechoso, subí una captura o mandá el audio.");
         return;
       }
       setCargando(true);
@@ -168,9 +228,10 @@ export default function Home() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            texto: textoIn.trim() || undefined,
+            texto: audioIn ? undefined : textoIn.trim() || undefined,
             imagenBase64: imagenIn?.base64,
-            mimeType: imagenIn?.mime,
+            audioBase64: audioIn?.base64,
+            mimeType: audioIn?.mime ?? imagenIn?.mime,
           }),
         });
         const data = await res.json();
@@ -186,7 +247,7 @@ export default function Home() {
         setCargando(false);
       }
     },
-    [texto, imagen]
+    [texto, imagen, audio]
   );
 
   // Contenido que llega desde el menú "Compartir" del celular (Web Share Target).
@@ -305,7 +366,7 @@ export default function Home() {
             }}
             onPaste={onPaste}
             rows={5}
-            placeholder={"Pegá acá el mensaje sospechoso…\n(WhatsApp, SMS o mail)"}
+            placeholder={"Pegá acá el mensaje sospechoso…\n(WhatsApp, SMS o mail)\n\n¿Te llegó un audio? Usá los botones de abajo."}
             className="w-full resize-y rounded-2xl border border-slate-200 bg-slate-50/60 p-4 text-lg leading-relaxed text-slate-900 placeholder:text-slate-500 focus:border-[var(--brand-600)] focus:bg-white focus:outline-none focus:ring-4 focus:ring-[var(--brand-600)]/10"
           />
 
@@ -326,9 +387,42 @@ export default function Home() {
             </div>
           )}
 
+          {audio && (
+            <div className="deslizar mt-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+              <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                <Mic className="h-4 w-4 text-slate-500" aria-hidden /> Audio listo para analizar
+                <button
+                  onClick={() => setAudio(null)}
+                  className="ml-auto rounded-lg p-1.5 text-slate-500 hover:bg-white hover:text-red-700"
+                  aria-label="Quitar audio"
+                >
+                  <X className="h-4 w-4" aria-hidden />
+                </button>
+              </div>
+              {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+              <audio src={audio.url} controls className="mt-2 w-full" />
+            </div>
+          )}
+
+          {grabando && (
+            <div className="deslizar mt-3 flex items-center gap-3 rounded-2xl border-2 border-red-200 bg-red-50 p-3.5">
+              <span className="latir h-3 w-3 shrink-0 rounded-full bg-red-600" aria-hidden />
+              <span className="font-medium text-red-900">
+                Grabando… {String(Math.floor(segundos / 60)).padStart(2, "0")}:
+                {String(segundos % 60).padStart(2, "0")}
+              </span>
+              <button
+                onClick={alternarGrabacion}
+                className="ml-auto rounded-xl bg-red-600 px-4 py-2 font-bold text-white hover:bg-red-700"
+              >
+                Listo
+              </button>
+            </div>
+          )}
+
           <button
             onClick={() => analizar()}
-            disabled={cargando}
+            disabled={cargando || grabando}
             className="sombra-boton mt-4 flex w-full items-center justify-center gap-2.5 rounded-2xl bg-[var(--brand)] px-5 py-4 text-lg font-bold text-white hover:bg-[var(--brand-600)] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-75"
           >
             {cargando ? (
@@ -357,16 +451,37 @@ export default function Home() {
               onChange={(e) => e.target.files?.[0] && cargarImagen(e.target.files[0])}
             />
             <button
+              onClick={() => audioRef.current?.click()}
+              className="flex items-center gap-1.5 text-sm font-medium text-slate-600 underline-offset-4 hover:text-[var(--brand)] hover:underline"
+            >
+              <AudioLines className="h-4 w-4" aria-hidden /> Subir una nota de voz
+            </button>
+            <input
+              ref={audioRef}
+              type="file"
+              accept="audio/*"
+              className="hidden"
+              onChange={(e) => e.target.files?.[0] && cargarAudio(e.target.files[0])}
+            />
+            <button
+              onClick={alternarGrabacion}
+              className="flex items-center gap-1.5 text-sm font-medium text-slate-600 underline-offset-4 hover:text-[var(--brand)] hover:underline"
+              title="Grabar el audio que te llegó o una llamada en altavoz"
+            >
+              <Mic className="h-4 w-4" aria-hidden /> {grabando ? "Detener" : "Grabar audio"}
+            </button>
+            <button
               onClick={() => {
                 const t = EJEMPLOS_EXTRA[Math.floor(Math.random() * EJEMPLOS_EXTRA.length)];
                 setTexto(t);
                 setImagen(null);
+                setAudio(null);
                 setVeredicto(null);
               }}
               className="flex items-center gap-1.5 text-sm font-medium text-slate-600 underline-offset-4 hover:text-[var(--brand)] hover:underline"
               title="Cargar un mensaje de prueba al azar"
             >
-              <Dices className="h-4 w-4" aria-hidden /> Probar con uno al azar
+              <Dices className="h-4 w-4" aria-hidden /> Uno al azar
             </button>
           </div>
 
@@ -472,6 +587,17 @@ export default function Home() {
                   </div>
                 </div>
               </div>
+
+              {veredicto.transcripcion && (
+                <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                    <AudioLines className="h-4 w-4" aria-hidden /> Esto es lo que dice el audio
+                  </p>
+                  <p className="mt-2 text-pretty italic leading-relaxed text-slate-700">
+                    “{veredicto.transcripcion}”
+                  </p>
+                </div>
+              )}
 
               <p className="mt-5 text-pretty text-lg leading-relaxed text-slate-800">
                 {veredicto.explicacionSimple}

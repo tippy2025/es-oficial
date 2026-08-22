@@ -12,6 +12,7 @@ import {
   ChevronDown,
   ChevronRight,
   Dices,
+  Download,
   Flag,
   Globe,
   Image as ImageIcon,
@@ -122,6 +123,16 @@ export default function Home() {
   const audioRef = useRef<HTMLInputElement>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const resultadoRef = useRef<HTMLDivElement>(null);
+  const textoRef = useRef<HTMLTextAreaElement>(null);
+
+  // El campo crece con el mensaje, como en una app de mensajería: sin barra de
+  // arrastre ni un cuadro vacío enorme cuando todavía no escribiste nada.
+  useEffect(() => {
+    const el = textoRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [texto]);
 
   // Mensajes rotativos mientras analiza: la espera se siente trabajo, no cuelgue.
   useEffect(() => {
@@ -253,7 +264,11 @@ export default function Home() {
 
   // Contenido que llega desde el menú "Compartir" del celular (Web Share Target).
   useEffect(() => {
-    let compartido: { texto?: string; imagenDataUrl?: string | null } | null = null;
+    let compartido: {
+      texto?: string;
+      imagenDataUrl?: string | null;
+      audioDataUrl?: string | null;
+    } | null = null;
     try {
       const raw = sessionStorage.getItem("esoficial_compartido");
       if (raw) {
@@ -270,12 +285,26 @@ export default function Home() {
       compartido = null;
     }
     if (!compartido) return;
+
+    const partir = (dataUrl: string, mimePorDefecto: string) => {
+      const [meta, b64] = dataUrl.split(",");
+      return { base64: b64, mime: meta.replace("data:", "").replace(";base64", "") || mimePorDefecto };
+    };
+
+    // El audio manda: si vino una nota de voz, se analiza eso.
+    if (compartido.audioDataUrl) {
+      const { base64, mime } = partir(compartido.audioDataUrl, "audio/ogg");
+      const aud = { base64, mime, url: compartido.audioDataUrl };
+      setAudio(aud);
+      void analizar("", null, aud);
+      return;
+    }
+
     const t = compartido.texto ?? "";
     let img: { base64: string; mime: string; preview: string } | null = null;
     if (compartido.imagenDataUrl) {
-      const [meta, b64] = compartido.imagenDataUrl.split(",");
-      const mime = meta.replace("data:", "").replace(";base64", "") || "image/png";
-      img = { base64: b64, mime, preview: compartido.imagenDataUrl };
+      const { base64, mime } = partir(compartido.imagenDataUrl, "image/png");
+      img = { base64, mime, preview: compartido.imagenDataUrl };
     }
     setTexto(t);
     setImagen(img);
@@ -363,7 +392,7 @@ export default function Home() {
           </div>
         </section>
 
-        <div className="mx-auto -mt-4 max-w-xl px-3">
+        <div className="mx-auto -mt-4 max-w-xl px-4">
           {/* Entrada de texto */}
           <div className="elevacion overflow-hidden rounded-2xl bg-white">
             <label htmlFor="mensaje" className="sr-only">
@@ -372,14 +401,15 @@ export default function Home() {
             <textarea
               id="mensaje"
               value={texto}
+              ref={textoRef}
               onChange={(e) => {
                 setTexto(e.target.value);
                 setVeredicto(null);
               }}
               onPaste={onPaste}
-              rows={4}
+              rows={3}
               placeholder="Pegá acá el mensaje que te llegó…"
-              className="w-full resize-y border-0 bg-white p-4 text-[17px] leading-relaxed text-[var(--tinta)] placeholder:text-[#8b93a1] focus:outline-none"
+              className="block max-h-[45vh] w-full resize-none overflow-y-auto border-0 bg-white p-4 text-[17px] leading-relaxed text-[var(--tinta)] placeholder:text-[#8b93a1] focus:outline-none"
             />
 
             {imagen && (
@@ -435,7 +465,7 @@ export default function Home() {
           </div>
 
           {/* Otras formas de mostrar el mensaje */}
-          <p className="mb-2 mt-5 px-1 text-[11px] font-bold uppercase tracking-wider text-[var(--gris)]">
+          <p className="mb-2 mt-6 text-[11px] font-bold uppercase tracking-wider text-[var(--gris)]">
             O mostranoslo así
           </p>
           <div className="elevacion overflow-hidden rounded-2xl">
@@ -484,6 +514,11 @@ export default function Home() {
             </button>
           </div>
 
+          <p className="mt-2.5 text-[13px] leading-snug text-[var(--gris)]">
+            ¿Es una nota de voz de WhatsApp? Mantenela apretada → <b>Compartir</b> → ¿Es Oficial?.
+            Si no te aparece en la lista, poné el audio en altavoz y tocá <b>Grabar</b>.
+          </p>
+
           {error && (
             <p className="aparecer mt-4 flex items-start gap-2 rounded-xl border-l-4 border-[var(--peligro)] bg-[var(--peligro-bg)] p-3.5 text-[15px] text-[var(--peligro)]">
               <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden /> {error}
@@ -493,7 +528,7 @@ export default function Home() {
           {/* Ejemplos */}
           {!veredicto && !cargando && (
             <div className="mt-6">
-              <p className="mb-2 px-1 text-[11px] font-bold uppercase tracking-wider text-[var(--gris)]">
+              <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-[var(--gris)]">
                 ¿No tenés ninguno a mano? Probá con un ejemplo
               </p>
               <div className="flex flex-wrap gap-2">
@@ -762,7 +797,7 @@ export default function Home() {
 
           <GuiaInstalacion />
 
-          <footer className="mt-8 space-y-2 px-1 text-center text-[13px] leading-relaxed text-[var(--gris)]">
+          <footer className="mt-8 space-y-2 text-center text-[13px] leading-relaxed text-[var(--gris)]">
             <p>
               ¿Es Oficial? evalúa señales de riesgo con inteligencia artificial y puede
               equivocarse. No reemplaza la verificación con el organismo o el banco por sus
@@ -842,11 +877,19 @@ function Plegable({
     </details>
   );
 }
+/** Evento propietario de Chrome/Edge para instalar la PWA sin pasar por el menú. */
+type EventoInstalar = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+};
+
 /** Guía para tener la app en el celular, según el sistema. Se oculta si ya está instalada. */
 function GuiaInstalacion() {
   const [so, setSo] = useState<"ios" | "android" | "otro" | null>(null);
   const [abierta, setAbierta] = useState(false);
   const [instalada, setInstalada] = useState(false);
+  const [instalador, setInstalador] = useState<EventoInstalar | null>(null);
+  const [instalando, setInstalando] = useState(false);
 
   useEffect(() => {
     const ua = navigator.userAgent;
@@ -859,7 +902,70 @@ function GuiaInstalacion() {
     else setSo("otro");
   }, []);
 
+  // Chrome/Edge avisan cuando la app es instalable: guardamos el evento para
+  // dispararlo con un solo toque. Safari/iOS no lo implementan (Apple no lo permite),
+  // así que ahí seguimos con los pasos manuales.
+  useEffect(() => {
+    const alPoder = (e: Event) => {
+      e.preventDefault();
+      setInstalador(e as EventoInstalar);
+    };
+    const alInstalar = () => {
+      setInstalada(true);
+      setInstalador(null);
+    };
+    window.addEventListener("beforeinstallprompt", alPoder);
+    window.addEventListener("appinstalled", alInstalar);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", alPoder);
+      window.removeEventListener("appinstalled", alInstalar);
+    };
+  }, []);
+
+  async function instalar() {
+    if (!instalador) return;
+    setInstalando(true);
+    try {
+      await instalador.prompt();
+      const { outcome } = await instalador.userChoice;
+      if (outcome === "accepted") setInstalada(true);
+      setInstalador(null);
+    } finally {
+      setInstalando(false);
+    }
+  }
+
   if (instalada || so === null) return null;
+
+  // Camino de un toque: el sistema abre su propio diálogo de instalación.
+  if (instalador) {
+    return (
+      <section className="mt-8">
+        <button
+          onClick={instalar}
+          disabled={instalando}
+          className="pulsable elevacion flex w-full items-center gap-3.5 rounded-2xl bg-white p-4 text-left disabled:opacity-70"
+        >
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[var(--azul)] text-white">
+            {instalando ? (
+              <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
+            ) : (
+              <Download className="h-5 w-5" aria-hidden />
+            )}
+          </span>
+          <span className="flex-1">
+            <span className="block text-[16px] font-bold text-[var(--tinta)]">
+              Instalar ¿Es Oficial? en este celular
+            </span>
+            <span className="mt-0.5 block text-[13px] leading-snug text-[var(--gris)]">
+              Queda como una app más y podés mandarle mensajes desde Compartir.
+            </span>
+          </span>
+          <ChevronRight className="h-5 w-5 shrink-0 text-[#a8b0bd]" aria-hidden />
+        </button>
+      </section>
+    );
+  }
 
   const pasos =
     so === "ios"

@@ -21,10 +21,11 @@ export function hayTranscripcion(): boolean {
 
 // Si un modelo está saturado (503) probamos con el siguiente: la demo no puede fallar.
 const MODELOS_AUDIO = [
-  process.env.GEMINI_MODEL_AUDIO || "gemini-flash-latest",
-  "gemini-2.5-flash",
-  "gemini-flash-lite-latest",
-  "gemini-2.5-flash-lite",
+  process.env.GEMINI_MODEL_AUDIO || "gemini-3.7-flash",
+  "gemini-3.6-flash",
+  "gemini-3.5-flash",
+  "gemini-flash-latest",
+  "gemini-3.5-flash-lite",
 ];
 
 async function intentar(model: string, audioBase64: string, mimeType: string) {

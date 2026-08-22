@@ -62,6 +62,17 @@ const EJEMPLOS_EXTRA = [
   "Hola Juan Manuel, te recordamos tu turno de Oftalmología el martes 26/08 a las 15:40 hs con la Dra. Pérez, Centro Médico Belgrano. Si necesitás cancelar, hacelo desde la app OSDE o llamando al 0810-555-6733.",
 ];
 
+// Formatos de grabación por orden de preferencia. Safari en iPhone solo hace mp4.
+const FORMATOS_AUDIO = [
+  "audio/webm;codecs=opus",
+  "audio/webm",
+  "audio/mp4",
+  "audio/aac",
+  "audio/ogg;codecs=opus",
+];
+// Debajo de esto la grabación es silencio: no tiene sentido mandarla a analizar.
+const UMBRAL_SILENCIO = 0.012;
+
 const PASOS_CARGA = [
   "Leyendo el mensaje…",
   "Buscando señales de estafa conocidas…",
@@ -119,9 +130,13 @@ export default function Home() {
   const [audio, setAudio] = useState<{ base64: string; mime: string; url: string } | null>(null);
   const [grabando, setGrabando] = useState(false);
   const [segundos, setSegundos] = useState(0);
+  const [nivel, setNivel] = useState(0);
   const fileRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLInputElement>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const medidorRef = useRef<number | null>(null);
+  const picoRef = useRef(0);
   const resultadoRef = useRef<HTMLDivElement>(null);
   const textoRef = useRef<HTMLTextAreaElement>(null);
 
@@ -188,15 +203,68 @@ export default function Home() {
       return;
     }
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const rec = new MediaRecorder(stream);
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          // Clave: el navegador, por defecto, cancela el eco — o sea, borra del
+          // micrófono justo el sonido que está saliendo del parlante. Eso es
+          // exactamente lo que queremos grabar, así que hay que apagarlo, junto
+          // con el filtro de ruido y el control automático de volumen.
+          echoCancellation: false,
+          noiseSuppression: false,
+          autoGainControl: false,
+          channelCount: 1,
+        },
+      });
+
+      // Medidor en vivo: si no entra sonido se ve al instante, en vez de
+      // enterarse recién cuando el análisis vuelve vacío.
+      const Ctx =
+        window.AudioContext ??
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      const ctx = new Ctx();
+      audioCtxRef.current = ctx;
+      const analizador = ctx.createAnalyser();
+      analizador.fftSize = 512;
+      ctx.createMediaStreamSource(stream).connect(analizador);
+      const muestras = new Uint8Array(analizador.fftSize);
+      picoRef.current = 0;
+      const medir = () => {
+        analizador.getByteTimeDomainData(muestras);
+        let suma = 0;
+        for (const v of muestras) {
+          const d = (v - 128) / 128;
+          suma += d * d;
+        }
+        const rms = Math.sqrt(suma / muestras.length);
+        picoRef.current = Math.max(picoRef.current, rms);
+        setNivel(rms);
+        medidorRef.current = requestAnimationFrame(medir);
+      };
+      medir();
+
+      const formato = FORMATOS_AUDIO.find((f) => MediaRecorder.isTypeSupported?.(f));
+      const rec = new MediaRecorder(stream, formato ? { mimeType: formato } : undefined);
       const trozos: BlobPart[] = [];
       rec.ondataavailable = (e) => e.data.size > 0 && trozos.push(e.data);
       rec.onstop = () => {
         stream.getTracks().forEach((t) => t.stop());
+        if (medidorRef.current) cancelAnimationFrame(medidorRef.current);
+        void ctx.close();
+        audioCtxRef.current = null;
         setGrabando(false);
-        const blob = new Blob(trozos, { type: rec.mimeType || "audio/webm" });
-        cargarAudio(new File([blob], "grabacion.webm", { type: blob.type }));
+        setNivel(0);
+
+        const tipo = rec.mimeType || formato || "audio/webm";
+        const blob = new Blob(trozos, { type: tipo });
+        // Si nunca entró sonido, avisamos en vez de mandar silencio a analizar.
+        if (picoRef.current < UMBRAL_SILENCIO || blob.size < 2000) {
+          setError(
+            "No entró sonido por el micrófono. Subí el volumen del audio, acercá el celular al parlante y probá de nuevo. Si el audio está en este mismo celular, mejor mandalo como archivo."
+          );
+          return;
+        }
+        const extension = tipo.includes("mp4") ? "m4a" : tipo.includes("ogg") ? "ogg" : "webm";
+        cargarAudio(new File([blob], `grabacion.${extension}`, { type: tipo }));
       };
       recorderRef.current = rec;
       rec.start();
@@ -205,7 +273,9 @@ export default function Home() {
       // corte de seguridad a los 3 minutos
       setTimeout(() => rec.state === "recording" && rec.stop(), 180000);
     } catch {
-      setError("No pudimos usar el micrófono. Podés subir el archivo de audio con el botón de al lado.");
+      setError(
+        "No pudimos usar el micrófono. Revisá que le hayas dado permiso al navegador, o subí el audio como archivo."
+      );
     }
   }, [grabando, cargarAudio]);
 
@@ -378,21 +448,21 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="flex-1 pb-32">
+      <main className="flex-1">
         {/* Encabezado institucional */}
-        <section className="bg-[var(--azul)] px-4 pb-7 pt-1">
+        <section className="bg-[var(--azul)] px-4 pb-6 pt-1">
           <div className="mx-auto max-w-xl">
             <h1 className="text-[22px] font-bold leading-snug text-white">
               ¿Te llegó un mensaje raro?
             </h1>
-            <p className="mt-1 text-[15px] leading-snug text-[#c3d3ea]">
+            <p className="mt-1.5 text-[15px] leading-snug text-[#c3d3ea]">
               Mostranoslo y te decimos si tiene señales de estafa, qué hacer, y con qué
               teléfono oficial verificar.
             </p>
           </div>
         </section>
 
-        <div className="mx-auto -mt-4 max-w-xl px-4">
+        <div className="mx-auto max-w-xl px-4 pb-10 pt-5">
           {/* Entrada de texto */}
           <div className="elevacion overflow-hidden rounded-2xl bg-white">
             <label htmlFor="mensaje" className="sr-only">
@@ -448,76 +518,93 @@ export default function Home() {
             )}
 
             {grabando && (
-              <div className="aparecer flex items-center gap-3 border-t border-[var(--borde)] bg-[var(--peligro-bg)] p-3.5">
-                <span className="latir h-3 w-3 shrink-0 rounded-full bg-[var(--peligro)]" aria-hidden />
-                <span className="font-semibold text-[var(--peligro)]">
-                  Grabando… {String(Math.floor(segundos / 60)).padStart(2, "0")}:
-                  {String(segundos % 60).padStart(2, "0")}
-                </span>
-                <button
+              <div className="aparecer border-t border-[var(--borde)] bg-[var(--peligro-bg)] p-4">
+                <div className="flex items-center gap-3">
+                  <span
+                    className="latir h-3 w-3 shrink-0 rounded-full bg-[var(--peligro)]"
+                    aria-hidden
+                  />
+                  <span className="font-bold text-[var(--peligro)]">
+                    Grabando {String(Math.floor(segundos / 60)).padStart(2, "0")}:
+                    {String(segundos % 60).padStart(2, "0")}
+                  </span>
+                  <button
+                    onClick={alternarGrabacion}
+                    className="pulsable ml-auto rounded-full bg-[var(--peligro)] px-6 py-2.5 font-bold text-white"
+                  >
+                    Listo
+                  </button>
+                </div>
+
+                {/* Medidor: si las barras no se mueven, no está entrando sonido. */}
+                <Medidor nivel={nivel} />
+                <p className="mt-2 text-[13px] leading-snug text-[var(--gris)]">
+                  {nivel > UMBRAL_SILENCIO
+                    ? "Se está escuchando. Cuando termine el audio, tocá Listo."
+                    : "Todavía no entra sonido: subí el volumen y acercá el celular al parlante."}
+                </p>
+              </div>
+            )}
+            {/* Barra de adjuntos, dentro de la misma caja: es la forma en que
+                una app de mensajería ofrece cámara y micrófono, sin gastar
+                media pantalla en una lista de opciones. */}
+            {!grabando && (
+              <div className="flex border-t border-[var(--borde)]">
+                <Adjunto
+                  icono={<Camera className="h-[22px] w-[22px]" aria-hidden />}
+                  etiqueta="Captura"
+                  activo={Boolean(imagen)}
+                  onClick={() => fileRef.current?.click()}
+                />
+                <Adjunto
+                  icono={<AudioLines className="h-[22px] w-[22px]" aria-hidden />}
+                  etiqueta="Nota de voz"
+                  activo={Boolean(audio)}
+                  onClick={() => audioRef.current?.click()}
+                />
+                <Adjunto
+                  icono={<Mic className="h-[22px] w-[22px]" aria-hidden />}
+                  etiqueta="Grabar"
                   onClick={alternarGrabacion}
-                  className="pulsable ml-auto rounded-full bg-[var(--peligro)] px-5 py-2 font-bold text-white"
-                >
-                  Listo
-                </button>
+                />
               </div>
             )}
           </div>
 
-          {/* Otras formas de mostrar el mensaje */}
-          <p className="mb-2 mt-6 text-[11px] font-bold uppercase tracking-wider text-[var(--gris)]">
-            O mostranoslo así
-          </p>
-          <div className="elevacion overflow-hidden rounded-2xl">
-            <button onClick={() => fileRef.current?.click()} className="fila pulsable">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#e8f1fb] text-[var(--cielo)]">
-                <Camera className="h-5 w-5" aria-hidden />
-              </span>
-              <span className="flex-1 text-[16px] font-semibold text-[var(--tinta)]">
-                Subir una captura de pantalla
-              </span>
-              <ChevronRight className="h-5 w-5 text-[#a8b0bd]" aria-hidden />
-            </button>
-            <input
-              ref={fileRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => e.target.files?.[0] && cargarImagen(e.target.files[0])}
-            />
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => e.target.files?.[0] && cargarImagen(e.target.files[0])}
+          />
+          <input
+            ref={audioRef}
+            type="file"
+            accept="audio/*"
+            className="hidden"
+            onChange={(e) => e.target.files?.[0] && cargarAudio(e.target.files[0])}
+          />
 
-            <button onClick={() => audioRef.current?.click()} className="fila pulsable">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#e8f1fb] text-[var(--cielo)]">
-                <AudioLines className="h-5 w-5" aria-hidden />
-              </span>
-              <span className="flex-1 text-[16px] font-semibold text-[var(--tinta)]">
-                Subir una nota de voz
-              </span>
-              <ChevronRight className="h-5 w-5 text-[#a8b0bd]" aria-hidden />
-            </button>
-            <input
-              ref={audioRef}
-              type="file"
-              accept="audio/*"
-              className="hidden"
-              onChange={(e) => e.target.files?.[0] && cargarAudio(e.target.files[0])}
-            />
+          {/* Acción principal, justo debajo de la caja de composición */}
+          <button
+            onClick={() => (veredicto ? limpiar() : analizar())}
+            disabled={cargando || grabando || (!hayAlgo && !veredicto)}
+            className="pulsable mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--azul)] px-5 py-4 text-[17px] font-bold text-white disabled:bg-[#e3e6eb] disabled:text-[#9aa3b2]"
+          >
+            {cargando ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin" aria-hidden /> Analizando…
+              </>
+            ) : (
+              <>
+                <Search className="h-5 w-5" aria-hidden />{" "}
+                {veredicto ? "Revisar otro mensaje" : "Analizar mensaje"}
+              </>
+            )}
+          </button>
 
-            <button onClick={alternarGrabacion} className="fila pulsable">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#e8f1fb] text-[var(--cielo)]">
-                <Mic className="h-5 w-5" aria-hidden />
-              </span>
-              <span className="flex-1 text-[16px] font-semibold text-[var(--tinta)]">
-                {grabando ? "Detener la grabación" : "Grabar un audio o una llamada"}
-              </span>
-              <ChevronRight className="h-5 w-5 text-[#a8b0bd]" aria-hidden />
-            </button>
-          </div>
-
-          <p className="mt-2.5 text-[13px] leading-snug text-[var(--gris)]">
-            ¿Es una nota de voz de WhatsApp? Mantenela apretada → <b>Compartir</b> → ¿Es Oficial?.
-            Si no te aparece en la lista, poné el audio en altavoz y tocá <b>Grabar</b>.
-          </p>
+          <AyudaAudio />
 
           {error && (
             <p className="aparecer mt-4 flex items-start gap-2 rounded-xl border-l-4 border-[var(--peligro)] bg-[var(--peligro-bg)] p-3.5 text-[15px] text-[var(--peligro)]">
@@ -529,9 +616,9 @@ export default function Home() {
           {!veredicto && !cargando && (
             <div className="mt-6">
               <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-[var(--gris)]">
-                ¿No tenés ninguno a mano? Probá con un ejemplo
+                Probá con un ejemplo
               </p>
-              <div className="flex flex-wrap gap-2">
+              <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {EJEMPLOS.map((ej) => (
                   <button
                     key={ej.etiqueta}
@@ -541,7 +628,7 @@ export default function Home() {
                       setAudio(null);
                       setVeredicto(null);
                     }}
-                    className="pulsable rounded-full border border-[var(--borde)] bg-white px-3.5 py-2 text-[14px] font-semibold text-[var(--cielo)]"
+                    className="pulsable shrink-0 whitespace-nowrap rounded-full border border-[var(--borde)] bg-white px-4 py-2.5 text-[14px] font-semibold text-[var(--cielo)]"
                   >
                     {ej.etiqueta}
                   </button>
@@ -554,7 +641,7 @@ export default function Home() {
                     setAudio(null);
                     setVeredicto(null);
                   }}
-                  className="pulsable flex items-center gap-1.5 rounded-full border border-dashed border-[var(--cielo)] bg-white px-3.5 py-2 text-[14px] font-semibold text-[var(--cielo)]"
+                  className="pulsable flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-dashed border-[var(--cielo)] bg-white px-4 py-2.5 text-[14px] font-semibold text-[var(--cielo)]"
                 >
                   <Dices className="h-4 w-4" aria-hidden /> Uno al azar
                 </button>
@@ -748,7 +835,7 @@ export default function Home() {
                       Llamá <strong>ya</strong> a tu banco por el número del dorso de tu tarjeta.
                       Denunciá el intento en la Unidad Fiscal de Ciberdelincuencia (UFECI):{" "}
                       <a
-                        className="font-semibold text-[var(--cielo)] underline underline-offset-2"
+                        className="inline-block py-1 font-semibold text-[var(--cielo)] underline underline-offset-2"
                         href="mailto:denunciasufeci@mpf.gov.ar"
                       >
                         denunciasufeci@mpf.gov.ar
@@ -760,6 +847,12 @@ export default function Home() {
               </div>
 
               <div className="space-y-2 border-t border-[var(--borde)] p-4">
+                <button
+                  onClick={limpiar}
+                  className="pulsable flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--azul)] px-4 py-3.5 text-[16px] font-bold text-white"
+                >
+                  <Search className="h-5 w-5" aria-hidden /> Revisar otro mensaje
+                </button>
                 <button
                   onClick={compartir}
                   className="pulsable flex w-full items-center justify-center gap-2 rounded-xl border-2 border-[var(--azul)] px-4 py-3.5 text-[16px] font-bold text-[var(--azul)]"
@@ -778,7 +871,7 @@ export default function Home() {
                   <button
                     onClick={reportar}
                     disabled={reportado}
-                    className="mx-auto flex items-center gap-1.5 py-1 text-[14px] font-semibold text-[var(--gris)] disabled:opacity-70"
+                    className="mx-auto flex items-center gap-1.5 px-3 py-2.5 text-[14px] font-semibold text-[var(--gris)] disabled:opacity-70"
                   >
                     {reportado ? (
                       <>
@@ -810,36 +903,100 @@ export default function Home() {
           </footer>
         </div>
       </main>
+    </div>
+  );
+}
 
-      {/* Acción principal, fija abajo como en una app */}
-      <div className="barra-inferior fixed inset-x-0 bottom-0 z-30 border-t border-[var(--borde)] bg-white/95 px-4 pt-3 backdrop-blur">
-        <div className="mx-auto max-w-xl">
-          {veredicto ? (
-            <button
-              onClick={limpiar}
-              className="pulsable flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--azul)] px-5 py-4 text-[17px] font-bold text-white"
-            >
-              <Search className="h-5 w-5" aria-hidden /> Revisar otro mensaje
-            </button>
-          ) : (
-            <button
-              onClick={() => analizar()}
-              disabled={cargando || grabando || !hayAlgo}
-              className="pulsable flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--azul)] px-5 py-4 text-[17px] font-bold text-white disabled:bg-[#aab2c0]"
-            >
-              {cargando ? (
-                <>
-                  <Loader2 className="h-5 w-5 animate-spin" aria-hidden /> Analizando…
-                </>
-              ) : (
-                <>
-                  <Search className="h-5 w-5" aria-hidden /> Analizar mensaje
-                </>
-              )}
-            </button>
-          )}
-        </div>
-      </div>
+/** Botón de la barra de adjuntos: ícono arriba, nombre corto abajo. */
+function Adjunto({
+  icono,
+  etiqueta,
+  activo,
+  onClick,
+}: {
+  icono: React.ReactNode;
+  etiqueta: string;
+  activo?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="pulsable flex flex-1 flex-col items-center gap-1 py-3 text-[var(--cielo)] active:bg-[#f6f8fb]"
+    >
+      <span
+        className={`flex h-11 w-11 items-center justify-center rounded-full ${
+          activo ? "bg-[var(--cielo)] text-white" : "bg-[#e8f1fb] text-[var(--cielo)]"
+        }`}
+      >
+        {activo ? <Check className="h-[22px] w-[22px]" aria-hidden /> : icono}
+      </span>
+      <span className="text-[12px] font-semibold text-[var(--gris)]">{etiqueta}</span>
+    </button>
+  );
+}
+
+/**
+ * Cómo hacer llegar una nota de voz, según el celular. No es igual en los dos:
+ * Android deja mandarla directo desde Compartir; Safari no implementa esa parte
+ * del estándar, así que en iPhone hay que pasar por Archivos.
+ */
+function AyudaAudio() {
+  const [so, setSo] = useState<"ios" | "android" | "otro" | null>(null);
+  useEffect(() => {
+    const ua = navigator.userAgent;
+    if (/iPhone|iPad|iPod/i.test(ua)) setSo("ios");
+    else if (/Android/i.test(ua)) setSo("android");
+    else setSo("otro");
+  }, []);
+  if (!so) return null;
+
+  return (
+    <p className="mt-2.5 px-0.5 text-[13px] leading-snug text-[var(--gris)]">
+      {so === "ios" ? (
+        <>
+          Nota de voz de WhatsApp: mantenela apretada → Compartir →{" "}
+          <b className="text-[var(--tinta)]">Guardar en Archivos</b>, y después tocá{" "}
+          <b className="text-[var(--tinta)]">Nota de voz</b>.
+        </>
+      ) : so === "android" ? (
+        <>
+          Nota de voz de WhatsApp: mantenela apretada → Compartir →{" "}
+          <b className="text-[var(--tinta)]">¿Es Oficial?</b>. Se analiza sola.
+        </>
+      ) : (
+        <>
+          Nota de voz: descargá el audio y tocá{" "}
+          <b className="text-[var(--tinta)]">Nota de voz</b>.
+        </>
+      )}{" "}
+      <b className="text-[var(--tinta)]">Grabar</b> es para lo que suena en otro aparato o en una
+      llamada en altavoz.
+    </p>
+  );
+}
+
+/** Barras de volumen en vivo: la prueba visible de que el micrófono está entrando. */
+function Medidor({ nivel }: { nivel: number }) {
+  const barras = 16;
+  // El oído es logarítmico; sin esto casi no se mueve nada con voz normal.
+  const activas = Math.round(Math.min(1, Math.sqrt(nivel * 7)) * barras);
+  return (
+    <div className="mt-3 flex h-8 items-end gap-1" aria-hidden>
+      {Array.from({ length: barras }, (_, i) => {
+        const encendida = i < activas;
+        const alto = 25 + (i / barras) * 75;
+        return (
+          <span
+            key={i}
+            className="flex-1 rounded-full transition-[height,background-color] duration-75"
+            style={{
+              height: `${encendida ? alto : 22}%`,
+              background: encendida ? "var(--peligro)" : "#e2c9c9",
+            }}
+          />
+        );
+      })}
     </div>
   );
 }
@@ -973,13 +1130,13 @@ function GuiaInstalacion() {
           "Tocá el botón Compartir de Safari (el cuadrado con la flecha ↑, abajo en el centro).",
           "Deslizá la lista hacia abajo y tocá “Agregar a inicio”.",
           "Tocá “Agregar”. Listo: el escudo queda en tu pantalla como una app más.",
-          "Cuando te llegue un mensaje raro: mantenelo apretado → Copiar, abrí ¿Es Oficial? y pegalo. Si es una captura, guardala y subila con 📷.",
+          "Cuando te llegue un mensaje raro: mantenelo apretado → Copiar, abrí ¿Es Oficial? y pegalo. Si es una captura, guardala y subila con la cámara. Si es una nota de voz, Compartir → Guardar en Archivos y después subila.",
         ]
       : so === "android"
         ? [
             "Tocá el menú ⋮ de Chrome (arriba a la derecha).",
             "Elegí “Agregar a pantalla de inicio” o “Instalar app” y confirmá.",
-            "Desde WhatsApp: mantené apretado el mensaje → Compartir → ¿Es Oficial?. Se analiza solo.",
+            "Desde WhatsApp: mantené apretado el mensaje, la captura o la nota de voz → Compartir → ¿Es Oficial?. Se analiza solo.",
           ]
         : [
             "Desde el celular podés instalarla como app: en Android desde el menú ⋮ de Chrome; en iPhone desde el botón Compartir de Safari → “Agregar a inicio”.",

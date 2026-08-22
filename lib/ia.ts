@@ -1,5 +1,6 @@
 import { REGLAS_CANALES_OFICIALES, Veredicto } from "./reglas";
 import { DIRECTORIO, buscarCanal, resumenDirectorioParaPrompt } from "./directorio";
+import { sanearTelefonos } from "./sanear";
 
 const SYSTEM_PROMPT = `Sos "¿Es Oficial?", un asistente argentino que evalúa si un mensaje (WhatsApp, SMS, mail, carta o llamada transcripta) es una probable estafa o una comunicación legítima. Tu usuario típico es una persona mayor o un familiar que la protege. Hablás en español rioplatense, simple y sin tecnicismos.
 
@@ -16,6 +17,7 @@ Reglas de tu análisis:
 4. Las señales deben citar elementos CONCRETOS del mensaje analizado (qué pide, qué canal usa, qué urgencia mete), no generalidades.
 5. "queHacer" son acciones inmediatas, imperativas y cortas ("No respondas", "No toques el link", "Llamá al número oficial de abajo, nunca al del mensaje").
 6. "organismoSuplantado": si el mensaje dice venir de (o se hace pasar por) alguno del directorio, poné su id exacto; si es de un familiar, un desconocido o de alguien que no está en el directorio, poné null. También completalo cuando el mensaje sea legítimo y venga de un organismo del directorio (así el usuario tiene el canal oficial a mano).
+7. Antes de poner "verde", hacete esta pregunta: ¿es una OFERTA COMERCIAL que no pedí (promo, refinanciación, descuento, sorteo, encuesta con premio) y me empuja a entrar a un link? Si la respuesta es sí, NO puede ser verde: es amarillo cuando el dominio es exactamente el oficial de la marca, y rojo cuando no lo es. Los avisos de servicio sobre algo que ya existe (un envío, un turno, una factura, un movimiento de tu cuenta) no son ofertas: esos sí son verdes.
 
 Respondé ÚNICAMENTE con un JSON válido, sin markdown ni texto extra, con esta forma exacta:
 {
@@ -40,28 +42,6 @@ interface EntradaAnalisis {
 const limpiarKey = (v?: string) => v?.replace(/^﻿/, "").trim() || undefined;
 export const anthropicKey = () => limpiarKey(process.env.ANTHROPIC_API_KEY);
 export const geminiKey = () => limpiarKey(process.env.GEMINI_API_KEY);
-
-/**
- * Red de seguridad: el modelo no debe dictar números de teléfono en el texto libre.
- * Un número inventado (ej. decir 130 —que es ANSES— cuando PAMI es 138) manda al
- * usuario al lugar equivocado. Sacamos cualquier número que no esté verificado.
- */
-// Solo líneas generales de emergencia/denuncia (no las de un organismo puntual:
-// justamente confundir 130 de ANSES con 138 de PAMI es el error que queremos evitar).
-const LINEAS_PERMITIDAS = new Set(["134", "137", "144", "911"]);
-
-function sanearTelefonos(txt: string, telefonoVerificado?: string | null): string {
-  if (!txt) return txt;
-  const digitosOk = telefonoVerificado?.replace(/\D/g, "") ?? "";
-  return txt.replace(/(?:\+?54\s*)?(?:\(?\d{2,4}\)?[\s.-]?)?\d{3,4}[\s.-]?\d{3,4}(?:[\s.-]?\d{2,4})?/g, (m) => {
-    const d = m.replace(/\D/g, "");
-    if (d.length < 3) return m; // no es un teléfono
-    if (digitosOk && (d === digitosOk || digitosOk.endsWith(d) || d.endsWith(digitosOk))) return m;
-    if (LINEAS_PERMITIDAS.has(d)) return m;
-    if (/^\d{4}$/.test(d) && Number(d) >= 1900 && Number(d) <= 2100) return m; // es un año
-    return "el número oficial que ves abajo";
-  });
-}
 
 function extraerJson(raw: string): Veredicto {
   const limpio = raw.replace(/```json|```/g, "").trim();
@@ -139,6 +119,14 @@ async function llamarAnthropic(entrada: EntradaAnalisis): Promise<string> {
   return data.content?.[0]?.text ?? "";
 }
 
+const MODELOS_GEMINI = [
+  process.env.GEMINI_MODEL || "gemini-3.7-flash",
+  "gemini-3.6-flash",
+  "gemini-3.5-flash",
+  "gemini-flash-latest",
+  "gemini-3.5-flash-lite",
+];
+
 async function llamarGemini(entrada: EntradaAnalisis): Promise<string> {
   const parts: unknown[] = [];
   if (entrada.imagenBase64) {
@@ -157,27 +145,59 @@ async function llamarGemini(entrada: EntradaAnalisis): Promise<string> {
     });
   }
 
-  const model = process.env.GEMINI_MODEL || "gemini-flash-latest";
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey()}`,
-    {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-        contents: [{ role: "user", parts }],
-        generationConfig: { maxOutputTokens: 1024, temperature: 0.2 },
-      }),
+  // Si un modelo está saturado (503) probamos con el siguiente: alguien que está
+  // mirando un mensaje sospechoso no puede quedarse sin respuesta.
+  let ultimo: Error | null = null;
+  for (const model of MODELOS_GEMINI) {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey()}`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+          contents: [{ role: "user", parts }],
+          generationConfig: {
+            // Los modelos nuevos razonan antes de contestar y ese razonamiento
+            // gasta del mismo presupuesto: con poco margen devuelven vacío.
+            maxOutputTokens: 4096,
+            temperature: 0.2,
+            responseMimeType: "application/json",
+          },
+        }),
+      }
+    );
+    if (res.ok) {
+      const data = await res.json();
+      // La respuesta puede venir partida en varios trozos, y algunos son el
+      // razonamiento interno del modelo: nos quedamos solo con la respuesta.
+      const texto: string = (data.candidates?.[0]?.content?.parts ?? [])
+        .filter((p: { thought?: boolean }) => !p?.thought)
+        .map((p: { text?: string }) => p?.text ?? "")
+        .join("");
+      if (texto.includes("{")) return texto;
+      ultimo = new Error(`Gemini ${model}: respuesta sin JSON`);
+      continue;
     }
-  );
-  if (!res.ok) throw new Error(`Gemini ${res.status}: ${await res.text()}`);
-  const data = await res.json();
-  return data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+    ultimo = new Error(`Gemini ${model} ${res.status}: ${await res.text()}`);
+    // 401/403 son de credenciales: reintentar no cambia nada. 404 significa
+    // que ese modelo ya no existe para esta cuenta, así que seguimos probando.
+    if (res.status === 401 || res.status === 403) break;
+  }
+  throw ultimo ?? new Error("Gemini no respondió");
 }
 
 export async function analizar(entrada: EntradaAnalisis): Promise<Veredicto> {
-  const raw = anthropicKey()
-    ? await llamarAnthropic(entrada)
-    : await llamarGemini(entrada);
-  return extraerJson(raw);
+  // Claude es el motor principal. Si falla por lo que sea (crédito agotado,
+  // caída, límite de uso), seguimos con Gemini en vez de dejar sin respuesta a
+  // alguien que está mirando un mensaje sospechoso y no sabe qué hacer.
+  if (anthropicKey()) {
+    try {
+      return extraerJson(await llamarAnthropic(entrada));
+    } catch (e) {
+      if (!geminiKey()) throw e;
+      console.error("Claude falló, sigo con Gemini:", e instanceof Error ? e.message : e);
+    }
+  }
+  return extraerJson(await llamarGemini(entrada));
 }

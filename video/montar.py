@@ -20,6 +20,34 @@ def duracion(p):
     return float(subprocess.check_output([FFP, "-v", "error", "-show_entries", "format=duration", "-of", "default=nw=1:nk=1", p]).decode().strip())
 
 
+def recortar_espera(visual):
+    """Saca de la grabación el tramo en que la app está analizando.
+
+    Sin esto la escena se va entera en la pantalla de carga: el montaje ajusta
+    la velocidad hasta un límite y después corta desde el principio, así que el
+    resultado —lo único que importa mostrar— nunca llega a verse.
+    """
+    marcas = os.path.splitext(visual)[0] + ".json"
+    if not os.path.exists(marcas):
+        return visual
+    desde, hasta = json.load(open(marcas, encoding="utf-8"))["saltar"]
+    salida = os.path.join(TMP, "corte_" + os.path.basename(visual).replace(".webm", ".mp4"))
+    partes = []
+    for i, (a, b) in enumerate([(0, desde), (hasta, None)]):
+        parte = os.path.join(TMP, f"p{i}_" + os.path.basename(visual).replace(".webm", ".mp4"))
+        args = ["-ss", f"{a:.2f}"] + (["-to", f"{b:.2f}"] if b else []) + ["-i", visual]
+        run([*args, "-an", "-c:v", "libx264", "-preset", "veryfast", "-crf", "18",
+             "-vf", "fps=30", "-pix_fmt", "yuv420p", parte])
+        partes.append(parte)
+    lista = os.path.join(TMP, "corte_lista.txt")
+    with open(lista, "w", encoding="utf-8") as f:
+        for p in partes:
+            f.write(f"file '{p.replace(os.sep, '/')}'\n")
+    run(["-f", "concat", "-safe", "0", "-i", lista, "-c", "copy", salida])
+    print(f"  recorté {hasta - desde:.1f}s de espera en {os.path.basename(visual)}")
+    return salida
+
+
 # Cada segmento: (archivo salida, visual, tipo, [audios en orden], duración objetivo)
 # El visual se estira/recorta a la duración de la voz; los videos largos se aceleran suave si hace falta.
 segmentos = [
@@ -51,6 +79,8 @@ for nombre, visual, tipo, audios, dur_fija in segmentos:
         dur = dur_fija
 
     vis = os.path.join(ESC, visual)
+    if tipo == "vid":
+        vis = recortar_espera(vis)
     if tipo == "img":
         # Ken Burns muy sutil (zoom 1.00 → 1.04)
         frames = int(dur * 30)

@@ -50,6 +50,11 @@ async function scrollA(page, selector, offset = 150, pasos = 26) {
   }
 }
 
+/**
+ * Graba una escena. `marcar` deja constancia del tramo muerto (la espera del
+ * análisis): el montaje lo corta, si no la escena se va en pantalla de carga y
+ * el resultado nunca llega a verse.
+ */
 async function grabar(id, fn) {
   const browser = await chromium.launch();
   const ctx = await browser.newContext({
@@ -61,31 +66,51 @@ async function grabar(id, fn) {
     hasTouch: true,
   });
   const page = await ctx.newPage();
-  await fn(page);
+  const t0 = Date.now();
+  const marcas = {};
+  const marcar = (nombre) => (marcas[nombre] = (Date.now() - t0) / 1000);
+  await fn(page, marcar);
   const video = page.video();
   await ctx.close();
   await browser.close();
   fs.renameSync(await video.path(), path.join(OUT, `${id}.webm`));
+
+  const cortes = path.join(OUT, `${id}.json`);
+  if (marcas.esperaDesde != null && marcas.esperaHasta - marcas.esperaDesde > 2.5) {
+    // Dejamos 1,2 s de pantalla de carga (se entiende que está trabajando) y
+    // recortamos el resto de la espera.
+    fs.writeFileSync(
+      cortes,
+      JSON.stringify({ saltar: [marcas.esperaDesde + 1.2, marcas.esperaHasta - 0.3] })
+    );
+    console.log(`OK ${id} (recorto ${(marcas.esperaHasta - marcas.esperaDesde - 1.5).toFixed(1)}s de espera)`);
+    return;
+  }
+  if (fs.existsSync(cortes)) fs.unlinkSync(cortes);
   console.log("OK", id);
 }
 
 // 03 — se pega el mensaje y se analiza
-await grabar("03_solucion", async (page) => {
+await grabar("03_solucion", async (page, marcar) => {
   await page.goto(URL, { waitUntil: "networkidle" });
   await sleep(1000);
   await tipearLento(page, MSG_PAMI, 7);
   await sleep(600);
   await page.click("text=Analizar mensaje");
+  marcar("esperaDesde");
   await page.waitForSelector("text=Alto riesgo de estafa", { timeout: 90000 });
+  marcar("esperaHasta");
   await sleep(500);
 });
 
 // 04 + 05 — resultado rojo, qué hacer, canal oficial
-await grabar("04_05_resultado_canal", async (page) => {
+await grabar("04_05_resultado_canal", async (page, marcar) => {
   await page.goto(URL, { waitUntil: "networkidle" });
   await page.fill("#mensaje", MSG_PAMI);
   await page.click("text=Analizar mensaje");
+  marcar("esperaDesde");
   await page.waitForSelector("text=Alto riesgo de estafa", { timeout: 90000 });
+  marcar("esperaHasta");
   await sleep(1200);
   await scrollA(page, "Qué hacer ahora", 140);
   await sleep(dur("04_resultado") * 1000 - 2500);
@@ -94,26 +119,30 @@ await grabar("04_05_resultado_canal", async (page) => {
 });
 
 // 06 — nota de voz
-await grabar("06_audio", async (page) => {
+await grabar("06_audio", async (page, marcar) => {
   await page.goto(URL, { waitUntil: "networkidle" });
   await sleep(700);
   await page.setInputFiles('input[accept="audio/*"]', path.join(RAIZ, "kit-prueba", "audio_estafa_hijo.mp3"));
   await sleep(1500);
   await page.click("text=Analizar mensaje");
+  marcar("esperaDesde");
   await page.waitForSelector("text=Esto dice el audio", { timeout: 120000 });
+  marcar("esperaHasta");
   await sleep(1200);
   await scrollA(page, "Esto dice el audio", 130);
   await sleep(dur("06_audio") * 1000 - 6000);
 });
 
 // 07 — mensaje legítimo
-await grabar("07_verde", async (page) => {
+await grabar("07_verde", async (page, marcar) => {
   await page.goto(URL, { waitUntil: "networkidle" });
   await sleep(500);
   await tipearLento(page, MSG_TURNO, 6);
   await sleep(400);
   await page.click("text=Analizar mensaje");
+  marcar("esperaDesde");
   await page.waitForSelector("text=Sin señales típicas", { timeout: 90000 });
+  marcar("esperaHasta");
   await sleep(dur("07_verde") * 1000 - 3000);
 });
 

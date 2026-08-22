@@ -8,9 +8,16 @@ const BASE = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.join(BASE, "escenas");
 fs.mkdirSync(OUT, { recursive: true });
 
+const escudo = (fill, qFill) => `
+<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M24 3.5 8.5 9.2v13.4c0 9.9 6.4 19.2 15.5 22 9.1-2.8 15.5-12.1 15.5-22V9.2L24 3.5Z" fill="${fill}"/>
+  <path d="M20.1 19.4c0-2.3 1.8-4 4-4s3.9 1.5 3.9 3.6c0 1.7-.9 2.6-2.4 3.6-1.3.9-1.8 1.6-1.8 3v.8h-3v-1.1c0-2.1.8-3.3 2.4-4.3 1.1-.7 1.5-1.2 1.5-2 0-.9-.7-1.5-1.7-1.5s-1.8.7-1.8 1.9h-3.1Zm2.3 12.9c0-1.1.8-1.9 1.9-1.9s1.9.8 1.9 1.9-.8 1.9-1.9 1.9-1.9-.8-1.9-1.9Z" fill="${qFill}"/>
+</svg>`;
+
 const estilo = `
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap');
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { width: 1080px; height: 1920px; background: #0f172a; color: #f8fafc; font-family: "Segoe UI", system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 90px; text-align: center; }
+  body { width: 1080px; height: 1920px; background: #232d4f; color: #ffffff; font-family: "Montserrat", "Segoe UI", system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 90px; text-align: center; }
   .wa { background: #111b21; border-radius: 36px; padding: 40px; width: 900px; text-align: left; box-shadow: 0 30px 80px rgba(0,0,0,.6); }
   .wa .head { display:flex; align-items:center; gap:22px; border-bottom:1px solid #2a3942; padding-bottom:24px; margin-bottom:28px; }
   .wa .ava { width:84px; height:84px; border-radius:50%; background:#00a884; display:flex; align-items:center; justify-content:center; font-size:44px; }
@@ -45,22 +52,17 @@ const placas = {
     <div class="stat"><div class="n">ANSES</div><div class="t">emitió una alerta oficial este mes por estafas a jubilados</div></div>
     <h2 style="margin-top:50px">La pregunta que miles de hijos reciben cada semana:</h2>
     <h1 style="color:#fbbf24;margin-top:30px">"¿Esto es verdad?"</h1>`,
-  "07_compartir_intro": `
-    <div class="tag">EN EL CELULAR</div>
-    <div class="shield">📲</div>
-    <h1>Desde WhatsApp</h1>
-    <h2 style="color:#93c5fd;margin-top:20px">Compartir → ¿Es Oficial?</h2>
-    <p style="margin-top:50px">Un toque y el mensaje se analiza solo.<br>Otro toque y el resultado vuelve por WhatsApp.</p>`,
   "08_cierre": `
-    <div class="shield">🛡️</div>
+    <div style="margin-bottom:36px">${escudo("#ffffff", "#232d4f").replace("<svg", '<svg width="220" height="220"')}</div>
     <h1>¿Es Oficial?</h1>
-    <h2 style="color:#93c5fd">Antes de responder, preguntá.</h2>
+    <h2 style="color:#75aadb;margin-top:14px">Antes de responder, preguntá.</h2>
     <div class="url">es-oficial.vercel.app</div>
-    <p style="margin-top:80px;font-size:34px;color:#94a3b8">Gratis · Sin registro · No guarda nada<br>Hecho con Claude + Next.js + Vercel · CoderCup AI 2026</p>`,
+    <p style="margin-top:70px;font-size:32px;color:#9fb4d4">Texto · Capturas · Notas de voz<br>Gratis, sin registro, y no guarda nada</p>`,
 };
 
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1080, height: 1920 } });
+await page.goto("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800");
 for (const [id, html] of Object.entries(placas)) {
   await page.setContent(`<html><head><meta charset="utf-8"><style>${estilo}</style></head><body>${html}</body></html>`);
   await page.waitForTimeout(300);

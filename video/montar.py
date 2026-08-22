@@ -27,9 +27,8 @@ segmentos = [
     ("s02", "02_problema.png", "img", ["02_problema"], None),
     ("s03", "03_solucion.webm", "vid", ["03_solucion"], None),
     ("s04", "04_05_resultado_canal.webm", "vid", ["04_resultado", "05_canal"], None),
-    ("s06", "06_verde.webm", "vid", ["06_verde"], None),
-    ("s07a", "07_compartir_intro.png", "img", [], 6.0),
-    ("s07b", "07_compartir.webm", "vid", ["07_compartir"], None),
+    ("s06", "06_audio.webm", "vid", ["06_audio"], None),
+    ("s07", "07_verde.webm", "vid", ["07_verde"], None),
     ("s08", "08_cierre.png", "img", ["08_cierre"], None),
 ]
 
@@ -50,16 +49,6 @@ for nombre, visual, tipo, audios, dur_fija in segmentos:
     else:
         audio = None
         dur = dur_fija
-
-    if nombre == "s07a":
-        # placa: primeros 6s del audio 07
-        audio = os.path.join(TMP, "s07a.mp3")
-        run(["-i", os.path.join(VOZ, "07_compartir.mp3"), "-t", "6", "-c", "copy", audio])
-        dur = 6.0
-    if nombre == "s07b":
-        audio = os.path.join(TMP, "s07b.mp3")
-        run(["-ss", "6", "-i", os.path.join(VOZ, "07_compartir.mp3"), "-c", "copy", audio])
-        dur = duracion(audio) + 0.6
 
     vis = os.path.join(ESC, visual)
     if tipo == "img":

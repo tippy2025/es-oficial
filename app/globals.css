@@ -10,20 +10,29 @@
   --azul: #232d4f; /* arg-azul: header y navegación */
   --azul-800: #1a2340;
   --cobalto: #3e5a7e;
-  --cielo: #0767a7; /* enlaces y acciones */
+  --cielo: #0a5c8f; /* enlaces y acciones: 7:1 sobre blanco */
   --cielo-claro: #039be5;
   --celeste: #75aadb; /* celeste de la bandera */
 
+  --celeste-claro: #9cc4ea; /* celeste legible sobre el azul */
+  --sobre-azul: #dbe6f6; /* texto secundario sobre el azul */
+
   --niebla: #f2f2f2; /* fondo general */
-  --borde: #dee2e6;
-  --gris: #5a6472;
+  --borde: #d3d8de;
+  --gris: #414a58; /* la usa mucha gente mayor: 8:1 sobre el fondo */
+  --gris-icono: #5f6875; /* flechitas y marcadores de posición */
   --tinta: #141414;
 
+  /* Los tonos plenos pintan fondos; los "-texto" son la versión legible
+     de ese mismo color cuando va escrito sobre su fondo suave. */
   --peligro: #c62828;
+  --peligro-texto: #9e1c1c;
   --peligro-bg: #fdf3f3;
   --alerta: #b26a00;
+  --alerta-texto: #7a4900;
   --alerta-bg: #fff8ea;
   --ok: #2e7d33;
+  --ok-texto: #1b5a1f;
   --ok-bg: #f1f8f1;
 
   --alto-barra: 3.5rem;

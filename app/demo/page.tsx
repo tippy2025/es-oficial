@@ -20,8 +20,8 @@ export default function Demo() {
       <header className="barra-superior sticky top-0 z-30 bg-[var(--azul)]">
         <div className="mx-auto flex h-14 max-w-3xl items-center gap-2.5 px-4">
           <Escudo className="h-7 w-7 text-white" />
-          <span className="text-[17px] font-bold tracking-tight text-white">¿Es Oficial?</span>
-          <span className="ml-auto text-[11px] font-semibold uppercase tracking-wider text-[var(--celeste)]">
+          <span className="text-[19px] font-bold tracking-tight text-white">¿Es Oficial?</span>
+          <span className="ml-auto text-[14px] font-semibold uppercase tracking-wider text-[var(--celeste-claro)]">
             CoderCup AI 2026
           </span>
         </div>
@@ -29,10 +29,10 @@ export default function Demo() {
 
       <section className="bg-[var(--azul)] px-4 pb-7 pt-2">
         <div className="mx-auto max-w-3xl">
-          <h1 className="text-[26px] font-bold leading-snug text-white">
+          <h1 className="text-[28px] font-bold leading-snug text-white">
             Antes de responder, preguntá.
           </h1>
-          <p className="mt-2 max-w-xl text-[16px] leading-snug text-[#c3d3ea]">
+          <p className="mt-2 max-w-xl text-[18px] leading-snug text-[var(--sobre-azul)]">
             Nueve de cada diez adultos mayores recibió un intento de estafa digital. ¿Es
             Oficial? lee el mensaje, la captura o la nota de voz, dice si tiene señales de
             estafa, qué hacer, y con qué teléfono oficial verificar.
@@ -53,14 +53,14 @@ export default function Demo() {
             className="block max-h-[78vh] w-full max-w-[min(100%,26rem)]"
           />
         </div>
-        <p className="mt-2 text-center text-[13px] text-[var(--gris)]">
+        <p className="mt-2 text-center text-[16px] text-[var(--gris)]">
           1 minuto 39 · con audio
         </p>
 
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
           <Link
             href="/"
-            className="pulsable elevacion flex items-center justify-center rounded-xl bg-[var(--azul)] px-5 py-4 text-[17px] font-bold text-white"
+            className="pulsable elevacion flex items-center justify-center rounded-xl bg-[var(--azul)] px-5 py-4 text-[19px] font-bold text-white"
           >
             Probar la app
           </Link>
@@ -68,17 +68,17 @@ export default function Demo() {
             href="https://github.com/tippy2025/es-oficial"
             target="_blank"
             rel="noopener noreferrer"
-            className="pulsable elevacion flex items-center justify-center rounded-xl bg-white px-5 py-4 text-[17px] font-bold text-[var(--azul)]"
+            className="pulsable elevacion flex items-center justify-center rounded-xl bg-white px-5 py-4 text-[19px] font-bold text-[var(--azul)]"
           >
             Ver el código
           </a>
         </div>
 
         <section className="elevacion mt-8 rounded-2xl bg-white p-5">
-          <h2 className="text-[11px] font-bold uppercase tracking-wider text-[var(--gris)]">
+          <h2 className="text-[14px] font-bold uppercase tracking-wider text-[var(--gris)]">
             Qué tiene adentro
           </h2>
-          <ul className="mt-3 space-y-3 text-[16px] leading-snug text-[var(--tinta)]">
+          <ul className="mt-3 space-y-3 text-[18px] leading-snug text-[var(--tinta)]">
             <li>
               <b>Analiza texto, capturas y notas de voz.</b> Las estafas con voz clonada
               explotaron en 2026 y hoy se clona una voz con menos de 30 segundos de audio.

@@ -122,7 +122,7 @@ await grabar("04_05_resultado_canal", async (page, marcar) => {
 await grabar("06_audio", async (page, marcar) => {
   await page.goto(URL, { waitUntil: "networkidle" });
   await sleep(700);
-  await page.setInputFiles('input[accept="audio/*"]', path.join(RAIZ, "kit-prueba", "audio_estafa_hijo.mp3"));
+  await page.setInputFiles('input[accept*="audio"]', path.join(RAIZ, "kit-prueba", "audio_estafa_hijo.mp3"));
   await sleep(1500);
   await page.click("text=Analizar mensaje");
   marcar("esperaDesde");

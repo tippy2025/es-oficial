@@ -91,21 +91,21 @@ type Estilo = {
 const COLORES: Record<string, Estilo> = {
   rojo: {
     linea: "var(--peligro)",
-    texto: "var(--peligro)",
+    texto: "var(--peligro-texto)",
     fondo: "var(--peligro-bg)",
     etiqueta: "Riesgo alto",
     nivelBarra: 3,
   },
   amarillo: {
     linea: "var(--alerta)",
-    texto: "var(--alerta)",
+    texto: "var(--alerta-texto)",
     fondo: "var(--alerta-bg)",
     etiqueta: "Riesgo medio",
     nivelBarra: 2,
   },
   verde: {
     linea: "var(--ok)",
-    texto: "var(--ok)",
+    texto: "var(--ok-texto)",
     fondo: "var(--ok-bg)",
     etiqueta: "Sin señales",
     nivelBarra: 1,
@@ -441,8 +441,8 @@ export default function Home() {
       <header className="barra-superior sticky top-0 z-30 bg-[var(--azul)]">
         <div className="mx-auto flex h-14 max-w-xl items-center gap-2.5 px-4">
           <Escudo className="h-7 w-7 text-white" />
-          <span className="text-[17px] font-bold tracking-tight text-white">¿Es Oficial?</span>
-          <span className="ml-auto flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--celeste)]">
+          <span className="text-[19px] font-bold tracking-tight text-white">¿Es Oficial?</span>
+          <span className="ml-auto flex items-center gap-1 text-[15px] font-semibold uppercase tracking-wider text-[var(--celeste-claro)]">
             <ShieldCheck className="h-3.5 w-3.5" aria-hidden /> Gratis
           </span>
         </div>
@@ -452,12 +452,12 @@ export default function Home() {
         {/* Encabezado institucional */}
         <section className="bg-[var(--azul)] px-4 pb-6 pt-1">
           <div className="mx-auto max-w-xl">
-            <h1 className="text-[22px] font-bold leading-snug text-white">
-              ¿Te llegó un mensaje raro?
+            <h1 className="text-[30px] font-extrabold leading-tight text-white">
+              ¿Te llegó un mensaje
+              <br />y no sabés si es verdadero?
             </h1>
-            <p className="mt-1.5 text-[15px] leading-snug text-[#c3d3ea]">
-              Mostranoslo y te decimos si tiene señales de estafa, qué hacer, y con qué
-              teléfono oficial verificar.
+            <p className="mt-2.5 text-[19px] leading-snug text-[var(--sobre-azul)]">
+              Copialo, pegalo acá abajo y te decimos si es una estafa.
             </p>
           </div>
         </section>
@@ -479,14 +479,14 @@ export default function Home() {
               onPaste={onPaste}
               rows={3}
               placeholder="Pegá acá el mensaje que te llegó…"
-              className="block max-h-[45vh] w-full resize-none overflow-y-auto border-0 bg-white p-4 text-[17px] leading-relaxed text-[var(--tinta)] placeholder:text-[#8b93a1] focus:outline-none"
+              className="block max-h-[45vh] w-full resize-none overflow-y-auto border-0 bg-white p-4 text-[19px] leading-relaxed text-[var(--tinta)] placeholder:text-[var(--gris-icono)] focus:outline-none"
             />
 
             {imagen && (
               <div className="aparecer flex items-center gap-3 border-t border-[var(--borde)] p-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={imagen.preview} alt="Captura subida" className="h-14 w-14 rounded-lg object-cover" />
-                <span className="text-[15px] font-semibold text-[var(--gris)]">Captura lista</span>
+                <span className="text-[17px] font-semibold text-[var(--gris)]">Captura lista</span>
                 <button
                   onClick={() => setImagen(null)}
                   className="pulsable ml-auto rounded-full p-2 text-[var(--gris)] hover:bg-[var(--niebla)]"
@@ -503,7 +503,7 @@ export default function Home() {
                   <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--cielo)]/10 text-[var(--cielo)]">
                     <AudioLines className="h-5 w-5" aria-hidden />
                   </span>
-                  <span className="text-[15px] font-semibold text-[var(--gris)]">Audio listo</span>
+                  <span className="text-[17px] font-semibold text-[var(--gris)]">Audio listo</span>
                   <button
                     onClick={() => setAudio(null)}
                     className="pulsable ml-auto rounded-full p-2 text-[var(--gris)] hover:bg-[var(--niebla)]"
@@ -538,7 +538,7 @@ export default function Home() {
 
                 {/* Medidor: si las barras no se mueven, no está entrando sonido. */}
                 <Medidor nivel={nivel} />
-                <p className="mt-2 text-[13px] leading-snug text-[var(--gris)]">
+                <p className="mt-2 text-[16px] leading-snug text-[var(--gris)]">
                   {nivel > UMBRAL_SILENCIO
                     ? "Se está escuchando. Cuando termine el audio, tocá Listo."
                     : "Todavía no entra sonido: subí el volumen y acercá el celular al parlante."}
@@ -581,7 +581,7 @@ export default function Home() {
           <input
             ref={audioRef}
             type="file"
-            accept="audio/*"
+            accept="audio/*,.opus,.ogg,.oga,.m4a,.mp3,.aac,.wav,.amr,.3gp"
             className="hidden"
             onChange={(e) => e.target.files?.[0] && cargarAudio(e.target.files[0])}
           />
@@ -589,8 +589,8 @@ export default function Home() {
           {/* Acción principal, justo debajo de la caja de composición */}
           <button
             onClick={() => (veredicto ? limpiar() : analizar())}
-            disabled={cargando || grabando || (!hayAlgo && !veredicto)}
-            className="pulsable mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--azul)] px-5 py-4 text-[17px] font-bold text-white disabled:bg-[#e3e6eb] disabled:text-[#9aa3b2]"
+            disabled={cargando || grabando}
+            className="pulsable mt-3 flex w-full items-center justify-center gap-2.5 rounded-xl bg-[var(--azul)] px-5 py-[1.15rem] text-[20px] font-bold text-white disabled:opacity-60"
           >
             {cargando ? (
               <>
@@ -607,7 +607,7 @@ export default function Home() {
           <AyudaAudio />
 
           {error && (
-            <p className="aparecer mt-4 flex items-start gap-2 rounded-xl border-l-4 border-[var(--peligro)] bg-[var(--peligro-bg)] p-3.5 text-[15px] text-[var(--peligro)]">
+            <p className="aparecer mt-4 flex items-start gap-2 rounded-xl border-l-4 border-[var(--peligro)] bg-[var(--peligro-bg)] p-3.5 text-[17px] text-[var(--peligro)]">
               <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden /> {error}
             </p>
           )}
@@ -615,8 +615,8 @@ export default function Home() {
           {/* Ejemplos */}
           {!veredicto && !cargando && (
             <div className="mt-6">
-              <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-[var(--gris)]">
-                Probá con un ejemplo
+              <p className="mb-2.5 text-[17px] font-bold text-[var(--gris)]">
+                ¿No tenés ninguno? Tocá un ejemplo
               </p>
               <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {EJEMPLOS.map((ej) => (
@@ -628,7 +628,7 @@ export default function Home() {
                       setAudio(null);
                       setVeredicto(null);
                     }}
-                    className="pulsable shrink-0 whitespace-nowrap rounded-full border border-[var(--borde)] bg-white px-4 py-2.5 text-[14px] font-semibold text-[var(--cielo)]"
+                    className="pulsable shrink-0 whitespace-nowrap rounded-full border border-[var(--borde)] bg-white px-4 py-2.5 text-[16px] font-semibold text-[var(--cielo)]"
                   >
                     {ej.etiqueta}
                   </button>
@@ -641,7 +641,7 @@ export default function Home() {
                     setAudio(null);
                     setVeredicto(null);
                   }}
-                  className="pulsable flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-dashed border-[var(--cielo)] bg-white px-4 py-2.5 text-[14px] font-semibold text-[var(--cielo)]"
+                  className="pulsable flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-dashed border-[var(--cielo)] bg-white px-4 py-2.5 text-[16px] font-semibold text-[var(--cielo)]"
                 >
                   <Dices className="h-4 w-4" aria-hidden /> Uno al azar
                 </button>
@@ -666,7 +666,7 @@ export default function Home() {
                   <div className="latir h-4 w-11/12 rounded-full bg-[#e4e8ee]" />
                   <div className="latir h-4 w-2/3 rounded-full bg-[#e4e8ee]" />
                 </div>
-                <p className="mt-5 text-center text-[14px] text-[var(--gris)]">{pasoCarga}</p>
+                <p className="mt-5 text-center text-[16px] text-[var(--gris)]">{pasoCarga}</p>
               </div>
             </section>
           )}
@@ -696,13 +696,13 @@ export default function Home() {
                   </span>
                   <div className="min-w-0 flex-1">
                     <span
-                      className="inline-block rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-white"
+                      className="inline-block rounded-full px-3 py-1 text-[16px] font-bold uppercase tracking-wider text-white"
                       style={{ background: c.linea }}
                     >
                       {c.etiqueta}
                     </span>
                     <h2
-                      className="mt-1.5 text-[22px] font-bold leading-tight"
+                      className="mt-1.5 text-[26px] font-bold leading-tight"
                       style={{ color: c.texto }}
                     >
                       {TITULOS[veredicto.nivel]}
@@ -712,16 +712,16 @@ export default function Home() {
 
                 {veredicto.transcripcion && (
                   <div className="mt-4 rounded-xl border-l-4 border-[var(--cielo)] bg-[#f3f8fd] p-3.5">
-                    <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[var(--cielo)]">
+                    <p className="flex items-center gap-1.5 text-[15px] font-bold uppercase tracking-wider text-[var(--cielo)]">
                       <AudioLines className="h-4 w-4" aria-hidden /> Esto dice el audio
                     </p>
-                    <p className="mt-1.5 text-[15px] italic leading-relaxed text-[var(--tinta)]">
+                    <p className="mt-1.5 text-[17px] italic leading-relaxed text-[var(--tinta)]">
                       “{veredicto.transcripcion}”
                     </p>
                   </div>
                 )}
 
-                <p className="mt-4 text-[17px] leading-relaxed text-[var(--tinta)]">
+                <p className="mt-4 text-[19px] leading-relaxed text-[var(--tinta)]">
                   {veredicto.explicacionSimple}
                 </p>
 
@@ -731,7 +731,7 @@ export default function Home() {
                     style={{ borderColor: c.linea, background: c.fondo }}
                   >
                     <h3
-                      className="text-[11px] font-bold uppercase tracking-wider"
+                      className="text-[15px] font-bold uppercase tracking-wider"
                       style={{ color: c.texto }}
                     >
                       Qué hacer ahora
@@ -740,12 +740,12 @@ export default function Home() {
                       {veredicto.queHacer.map((s, i) => (
                         <li key={i} className="flex gap-3">
                           <span
-                            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[12px] font-bold text-white"
+                            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[16px] font-bold text-white"
                             style={{ background: c.linea }}
                           >
                             {i + 1}
                           </span>
-                          <span className="text-[16px] font-medium leading-snug text-[var(--tinta)]">
+                          <span className="text-[18px] font-medium leading-snug text-[var(--tinta)]">
                             {s}
                           </span>
                         </li>
@@ -758,18 +758,18 @@ export default function Home() {
               {/* Canal oficial: el diferencial */}
               {veredicto.canalOficial && (
                 <div className="bg-[var(--azul)] p-5 text-white">
-                  <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[var(--celeste)]">
+                  <p className="flex items-center gap-1.5 text-[15px] font-bold uppercase tracking-wider text-[var(--celeste-claro)]">
                     <BadgeCheck className="h-4 w-4" aria-hidden /> Canal oficial verificado ·{" "}
                     {veredicto.canalOficial.nombre}
                   </p>
-                  <p className="mt-2 text-[15px] leading-snug text-[#c3d3ea]">
+                  <p className="mt-2 text-[17px] leading-snug text-[var(--sobre-azul)]">
                     {veredicto.canalOficial.nuncaHace}
                   </p>
                   <div className="mt-4 space-y-2">
                     {veredicto.canalOficial.telefono && (
                       <a
                         href={`tel:${veredicto.canalOficial.telefono.replace(/[^\d+]/g, "")}`}
-                        className="pulsable flex w-full items-center justify-center gap-2 rounded-xl bg-white px-4 py-3.5 text-[17px] font-bold text-[var(--azul)]"
+                        className="pulsable flex w-full items-center justify-center gap-2 rounded-xl bg-white px-4 py-3.5 text-[19px] font-bold text-[var(--azul)]"
                       >
                         <Phone className="h-5 w-5" aria-hidden /> Llamar al{" "}
                         {veredicto.canalOficial.telefono}
@@ -780,13 +780,13 @@ export default function Home() {
                         href={`https://${veredicto.canalOficial.web}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="pulsable flex w-full items-center justify-center gap-2 rounded-xl border border-white/35 px-4 py-3.5 text-[16px] font-bold text-white"
+                        className="pulsable flex w-full items-center justify-center gap-2 rounded-xl border border-white/35 px-4 py-3.5 text-[18px] font-bold text-white"
                       >
                         <Globe className="h-5 w-5" aria-hidden /> {veredicto.canalOficial.web}
                       </a>
                     )}
                   </div>
-                  <p className="mt-3 text-[13px] leading-snug text-[#9fb4d4]">
+                  <p className="mt-3 text-[16px] leading-snug text-[var(--sobre-azul)]">
                     Estos son los datos reales del organismo, no los del mensaje. Llamá o entrá
                     vos: nunca desde el link que te mandaron.
                   </p>
@@ -805,7 +805,7 @@ export default function Home() {
                       {veredicto.senales.map((s, i) => (
                         <li
                           key={i}
-                          className="rounded-r-lg border-l-[3px] bg-[var(--niebla)] py-2.5 pl-3.5 pr-3 text-[15px] leading-snug text-[var(--tinta)]"
+                          className="rounded-r-lg border-l-[3px] bg-[var(--niebla)] py-2.5 pl-3.5 pr-3 text-[17px] leading-snug text-[var(--tinta)]"
                           style={{ borderColor: c.linea }}
                         >
                           {s}
@@ -820,7 +820,7 @@ export default function Home() {
                     icono={<CheckCircle2 className="h-5 w-5" aria-hidden />}
                     titulo="Cómo confirmarlo por las tuyas"
                   >
-                    <p className="text-[15px] leading-relaxed text-[var(--tinta)]">
+                    <p className="text-[17px] leading-relaxed text-[var(--tinta)]">
                       {veredicto.verificacionOficial}
                     </p>
                   </Plegable>
@@ -831,7 +831,7 @@ export default function Home() {
                     icono={<Siren className="h-5 w-5" aria-hidden />}
                     titulo="Si ya diste datos o transferiste"
                   >
-                    <p className="text-[15px] leading-relaxed text-[var(--tinta)]">
+                    <p className="text-[17px] leading-relaxed text-[var(--tinta)]">
                       Llamá <strong>ya</strong> a tu banco por el número del dorso de tu tarjeta.
                       Denunciá el intento en la Unidad Fiscal de Ciberdelincuencia (UFECI):{" "}
                       <a
@@ -849,13 +849,13 @@ export default function Home() {
               <div className="space-y-2 border-t border-[var(--borde)] p-4">
                 <button
                   onClick={limpiar}
-                  className="pulsable flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--azul)] px-4 py-3.5 text-[16px] font-bold text-white"
+                  className="pulsable flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--azul)] px-4 py-3.5 text-[18px] font-bold text-white"
                 >
                   <Search className="h-5 w-5" aria-hidden /> Revisar otro mensaje
                 </button>
                 <button
                   onClick={compartir}
-                  className="pulsable flex w-full items-center justify-center gap-2 rounded-xl border-2 border-[var(--azul)] px-4 py-3.5 text-[16px] font-bold text-[var(--azul)]"
+                  className="pulsable flex w-full items-center justify-center gap-2 rounded-xl border-2 border-[var(--azul)] px-4 py-3.5 text-[18px] font-bold text-[var(--azul)]"
                 >
                   {copiado ? (
                     <>
@@ -871,7 +871,7 @@ export default function Home() {
                   <button
                     onClick={reportar}
                     disabled={reportado}
-                    className="mx-auto flex items-center gap-1.5 px-3 py-2.5 text-[14px] font-semibold text-[var(--gris)] disabled:opacity-70"
+                    className="mx-auto flex items-center gap-1.5 px-3 py-2.5 text-[16px] font-semibold text-[var(--gris)] disabled:opacity-70"
                   >
                     {reportado ? (
                       <>
@@ -890,7 +890,7 @@ export default function Home() {
 
           <GuiaInstalacion />
 
-          <footer className="mt-8 space-y-2 text-center text-[13px] leading-relaxed text-[var(--gris)]">
+          <footer className="mt-8 space-y-2 text-center text-[16px] leading-relaxed text-[var(--gris)]">
             <p>
               ¿Es Oficial? evalúa señales de riesgo con inteligencia artificial y puede
               equivocarse. No reemplaza la verificación con el organismo o el banco por sus
@@ -931,7 +931,7 @@ function Adjunto({
       >
         {activo ? <Check className="h-[22px] w-[22px]" aria-hidden /> : icono}
       </span>
-      <span className="text-[12px] font-semibold text-[var(--gris)]">{etiqueta}</span>
+      <span className="text-[16px] font-semibold text-[var(--gris)]">{etiqueta}</span>
     </button>
   );
 }
@@ -952,7 +952,7 @@ function AyudaAudio() {
   if (!so) return null;
 
   return (
-    <p className="mt-2.5 px-0.5 text-[13px] leading-snug text-[var(--gris)]">
+    <p className="mt-2.5 px-0.5 text-[16px] leading-snug text-[var(--gris)]">
       {so === "ios" ? (
         <>
           Nota de voz de WhatsApp: mantenela apretada → Compartir →{" "}
@@ -1019,14 +1019,14 @@ function Plegable({
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--niebla)] text-[var(--gris)]">
           {icono}
         </span>
-        <span className="flex-1 text-[16px] font-semibold text-[var(--tinta)]">{titulo}</span>
+        <span className="flex-1 text-[18px] font-semibold text-[var(--tinta)]">{titulo}</span>
         {contador && (
-          <span className="rounded-full bg-[var(--niebla)] px-2 py-0.5 text-[13px] font-bold text-[var(--gris)]">
+          <span className="rounded-full bg-[var(--niebla)] px-2 py-0.5 text-[16px] font-bold text-[var(--gris)]">
             {contador}
           </span>
         )}
         <ChevronDown
-          className="h-5 w-5 shrink-0 text-[#a8b0bd] transition-transform group-open:rotate-180"
+          className="h-5 w-5 shrink-0 text-[var(--gris-icono)] transition-transform group-open:rotate-180"
           aria-hidden
         />
       </summary>
@@ -1111,14 +1111,14 @@ function GuiaInstalacion() {
             )}
           </span>
           <span className="flex-1">
-            <span className="block text-[16px] font-bold text-[var(--tinta)]">
+            <span className="block text-[18px] font-bold text-[var(--tinta)]">
               Instalar ¿Es Oficial? en este celular
             </span>
-            <span className="mt-0.5 block text-[13px] leading-snug text-[var(--gris)]">
+            <span className="mt-0.5 block text-[16px] leading-snug text-[var(--gris)]">
               Queda como una app más y podés mandarle mensajes desde Compartir.
             </span>
           </span>
-          <ChevronRight className="h-5 w-5 shrink-0 text-[#a8b0bd]" aria-hidden />
+          <ChevronRight className="h-5 w-5 shrink-0 text-[var(--gris-icono)]" aria-hidden />
         </button>
       </section>
     );
@@ -1153,17 +1153,17 @@ function GuiaInstalacion() {
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#e8f1fb] text-[var(--cielo)]">
             <Smartphone className="h-5 w-5" aria-hidden />
           </span>
-          <span className="flex-1 text-[16px] font-semibold text-[var(--tinta)]">
+          <span className="flex-1 text-[18px] font-semibold text-[var(--tinta)]">
             Tenerla a mano en el celular{" "}
             {so === "ios" ? "(iPhone)" : so === "android" ? "(Android)" : ""}
           </span>
           <ChevronDown
-            className={`h-5 w-5 shrink-0 text-[#a8b0bd] transition-transform ${abierta ? "rotate-180" : ""}`}
+            className={`h-5 w-5 shrink-0 text-[var(--gris-icono)] transition-transform ${abierta ? "rotate-180" : ""}`}
             aria-hidden
           />
         </button>
         {abierta && (
-          <ol className="aparecer list-decimal space-y-2 border-t border-[var(--borde)] bg-white px-5 py-4 pl-9 text-[15px] leading-snug text-[var(--tinta)]">
+          <ol className="aparecer list-decimal space-y-2 border-t border-[var(--borde)] bg-white px-5 py-4 pl-9 text-[17px] leading-snug text-[var(--tinta)]">
             {pasos.map((p, i) => (
               <li key={i}>{p}</li>
             ))}

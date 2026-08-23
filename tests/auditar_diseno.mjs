@@ -26,7 +26,10 @@ const auditoria = `() => {
     vistos.add(cont);
     const hijos = [...cont.children].filter((e) => {
       const s = getComputedStyle(e);
-      return visible(e) && s.position !== "absolute" && s.position !== "fixed";
+      // Solo bloques: dos <b> dentro de un párrafo se "pisan" al cortar línea,
+      // y eso no es un problema de layout.
+      const enLinea = s.display.startsWith("inline") && s.display !== "inline-block";
+      return visible(e) && !enLinea && s.position !== "absolute" && s.position !== "fixed";
     });
     for (let i = 0; i < hijos.length - 1; i++) {
       const a = hijos[i].getBoundingClientRect();

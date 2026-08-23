@@ -95,10 +95,34 @@ Subí el video (`video/es-oficial-video.mp4`) directo a LinkedIn en vez de poner
 | https://es-oficial.vercel.app/demo | El video de 1:39 + accesos a la app y al código |
 | https://github.com/tippy2025/es-oficial | El código |
 
+## Si te preguntan por los audios en iPhone
+
+Se puede, con un paso más. Apple **no permite** dos cosas en el navegador, y no
+hay forma de esquivarlas:
+
+1. Que una app web aparezca en el menú Compartir del sistema (Safari no
+   implementa Web Share Target). En Android sí funciona: Compartir → ¿Es Oficial?
+   y se analiza solo.
+2. Grabar con el micrófono el audio que suena en ese mismo teléfono, porque al
+   cambiar de app la grabación se corta.
+
+**La ruta que sí anda en iPhone:** mantené apretada la nota de voz en WhatsApp →
+Compartir → **Guardar en Archivos** → abrís la app → **Nota de voz** → la buscás.
+La app te muestra esos pasos sola cuando detecta que estás en iPhone.
+
+**Grabar** queda para lo que suena en otro aparato: una llamada en altavoz, o el
+audio reproducido desde otro celular o la computadora. Ahí sí funciona en los dos
+sistemas, y mientras grabás ves las barras de volumen moverse.
+
+---
+
 ## Estado verificado el 22/8/2026
 
 - Suite de 71 casos reales contra producción: **71/71 (100%)**
 - Auditoría de diseño en pantalla de celular: sin solapes, sin desbordes, márgenes parejos
+- Legibilidad para adultos mayores: texto de lectura en 17–19px y contraste 8:1
+  (lo mínimo cómodo es 7:1). Solo quedan en 15–16px cuatro etiquetas cortas de
+  sección, blanco sobre color pleno.
 - Nota de voz compartida desde el sistema (Android): analiza sola, correcto
 - Grabación con micrófono: detecta sonido y detecta silencio, correcto
 - Saneador de teléfonos: 19/19
